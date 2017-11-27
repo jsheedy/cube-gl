@@ -2,3 +2,8 @@ cube-gl
 cube-gl2
 cube-gl.dSYM/
 cube-gl2.dSYM/
+cube-geometry-shader
+cube-geometry-shader.dSYM/Contents/Info.plist
+.vscode/tasks.json
+.vscode/tags
+.vscode/launch.json
