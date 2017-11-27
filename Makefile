@@ -4,7 +4,7 @@ cube-gl: cube-gl.cpp shaders/wood-cube.vs shaders/wood-cube.fs shaders/lamp.vs s
 cube-gl2: cube-gl2.cpp shaders/brain-glow.vs shaders/brain-glow.fs shaders/lamp.vs shaders/lamp.fs
 	g++ -g `pkg-config --cflags glfw3` -o cube-gl2 cube-gl2.cpp glad.c  `pkg-config --static --libs glfw3` -I .
 
-cube-geometry-shader: cube-geometry-shader.cpp shaders/brain-glow.vs shaders/brain-glow.fs shaders/lamp.vs shaders/lamp.fs shaders/brain-glow.gs
+cube-geometry-shader: cube-geometry-shader.cpp shader.h shaders/brain-glow.vs shaders/brain-glow.fs shaders/geometry.vs shaders/geometry.fs shaders/geometry.gs
 	g++ -g `pkg-config --cflags glfw3` -o cube-geometry-shader cube-geometry-shader.cpp glad.c  `pkg-config --static --libs glfw3` -I .
 
 clean:

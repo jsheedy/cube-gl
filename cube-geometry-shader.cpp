@@ -29,7 +29,7 @@ float lastX;
 float lastY;
 
 Camera camera = Camera(
-    glm::vec3(0.0f, 2.0f, 5.0f),
+    glm::vec3(0.0f, 1.0f, 2.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     -90.0f,
     -20.0f
@@ -139,7 +139,9 @@ int main()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6* sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    Shader lightingShader("shaders/brain-glow.vs", "shaders/brain-glow.fs");
+    // Shader lightingShader("shaders/brain-glow.vs", "shaders/brain-glow.fs");
+
+    Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
 
     float t = 0;
 
@@ -165,28 +167,24 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
 
         // draw cube
-        lightingShader.use();
-        lightingShader.setMat4("view", view);
-        lightingShader.setMat4("projection", projection);
-        lightingShader.setFloat("t", t);
-        float rotationAngle = 20.4f * t;
+        geometryShader.use();
+        geometryShader.setMat4("view", view);
+        geometryShader.setMat4("projection", projection);
+        // geometryShader.setFloat("t", t);
+        float rotationAngle = 10.4f * t;
 
         glBindVertexArray(cubeVAO);
 
-        for (float x=-10.0f; x < 11.0f; x += 2.0f) {
-            for (float z=-10.0f; z < 11.0f; z += 2.0f) {
-                glLineWidth(100.0f);
-                glm::vec3 cubePosition = glm::vec3(x, 0.0f,  z);
-                glm::mat4 model;
-                model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-                model = glm::translate(model, cubePosition);
-                model = glm::scale(model, glm::vec3(0.8f));
-                lightingShader.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 36);
-                glDrawArrays(GL_LINE_STRIP, 0, 36);
-
-            }
-        }
+        glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f,  0.0f);
+        glm::mat4 model;
+        model = glm::translate(model, cubePosition);
+        model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.8f));
+        geometryShader.setMat4("model", model);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glDrawArrays(GL_LINES, 0, 36);
+        // glDrawArrays(GL_LINES_ADJACENCY, 0, 36);
+        glDrawArrays(GL_POINTS, 0, 36);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
