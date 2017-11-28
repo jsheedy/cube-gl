@@ -25,6 +25,7 @@ int height = 900;
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 bool clearScreen = true;
+bool mouseLookOn = true;
 float lastX;
 float lastY;
 
@@ -50,6 +51,9 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         clearScreen = !clearScreen;
 
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+        mouseLookOn = !mouseLookOn;
+
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
@@ -66,6 +70,9 @@ void processInput(GLFWwindow *window)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    if (!mouseLookOn) {
+        return;
+    }
     if (std::isnan(lastX) || std::isnan(lastY))
     {
         lastX = xpos;
@@ -130,11 +137,12 @@ int main()
 
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    int N = 800;
-    // float *points = new float[N*N*3]();
-    float points[N*N*3];
+    unsigned long N = 2000;
+    unsigned long size_points = N*N*3;
+    float *points;
+    points = new float[N*N*3];
 
-    int idx=0;
+    unsigned long idx=0;
     for (int i=0; i<N; i++) {
         for (int j=0; j<N; j++) {
             // x-z plane
@@ -150,7 +158,7 @@ int main()
     //  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
     // -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
     // };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size_points * sizeof(float), points, GL_STATIC_DRAW);
     // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
