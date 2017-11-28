@@ -81,7 +81,7 @@ public:
         // shader Program
         ID = glCreateProgram();
         glAttachShader(ID, vertex);
-        glAttachShader(ID, geometry);
+        // glAttachShader(ID, geometry);
         glAttachShader(ID, fragment);
         glLinkProgram(ID);
         checkCompileErrors(ID, "PROGRAM");

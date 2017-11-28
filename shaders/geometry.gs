@@ -28,7 +28,7 @@ void main() {
     //     EmitVertex();
     // }
 
-    float w = 0.01f;
+    float w = 0.005f;
     gl_Position = gl_in[0].gl_Position + vec4(-w, -w, 0.0, 0.0);    // 1:bottom-left
     EmitVertex();
     gl_Position = gl_in[0].gl_Position + vec4( w, -w, 0.0, 0.0);    // 2:bottom-right

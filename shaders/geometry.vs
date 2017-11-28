@@ -13,7 +13,7 @@ uniform mat4 projection;
 
 void main()
 {
-    float y = 0.06 * sin(2.0*t+ 20.0 * aPos.x) + 0.05 * sin(2.0*t+ 20.0 * aPos.z);
+    float y = 0.02 * sin(2.0*t+ 20.0 * aPos.x) + 0.03 * sin(2.0*t+ 20.0 * aPos.z);
     gl_Position = projection * view * model * vec4(aPos.x, y, aPos.z, 1.0);
     // gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     // fragPos = vec3(model * vec4(aPos, 1.0));

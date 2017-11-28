@@ -130,7 +130,7 @@ int main()
 
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    int N = 700;
+    int N = 800;
     // float *points = new float[N*N*3]();
     float points[N*N*3];
 
@@ -153,16 +153,17 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
     // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6* sizeof(float)));
-    glEnableVertexAttribArray(2);
+    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(3* sizeof(float)));
+    // glEnableVertexAttribArray(1);
+    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(6* sizeof(float)));
+    // glEnableVertexAttribArray(2);
 
     // Shader lightingShader("shaders/brain-glow.vs", "shaders/brain-glow.fs");
 
-    Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
+    Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/passthru.gs");
+    // Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
 
     float t = 0;
 
@@ -200,12 +201,12 @@ int main()
         glm::mat4 model;
         model = glm::translate(model, cubePosition);
         model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(4.0f));
+        model = glm::scale(model, glm::vec3(100.0f));
         geometryShader.setMat4("model", model);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        // glDrawArrays(GL_LINES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, N*N);
+        // glDrawArrays(GL_LINES, 0, N*N);
         // glDrawArrays(GL_LINES_ADJACENCY, 0, 36);
-        glDrawArrays(GL_POINTS, 0, N*N);
+        // glDrawArrays(GL_POINTS, 0, N*N);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
