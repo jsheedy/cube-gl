@@ -130,7 +130,28 @@ int main()
 
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    int N = 700;
+    // float *points = new float[N*N*3]();
+    float points[N*N*3];
+
+    int idx=0;
+    for (int i=0; i<N; i++) {
+        for (int j=0; j<N; j++) {
+            // x-z plane
+            points[idx++] = (((float)i)/N - 0.5f);
+            points[idx++] = 0;
+            points[idx++] = (((float)j)/N - 0.5f);
+        }
+    }
+
+    // {
+    // -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
+    //  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
+    //  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+    // -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
+    // };
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -147,7 +168,7 @@ int main()
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
-    camera.MovementSpeed = 15.0f;
+    camera.MovementSpeed = 10.0f;
 
     while(!glfwWindowShouldClose(window))
     {
@@ -170,8 +191,8 @@ int main()
         geometryShader.use();
         geometryShader.setMat4("view", view);
         geometryShader.setMat4("projection", projection);
-        // geometryShader.setFloat("t", t);
-        float rotationAngle = 10.4f * t;
+        geometryShader.setFloat("t", t);
+        float rotationAngle = 3.4f * t;
 
         glBindVertexArray(cubeVAO);
 
@@ -179,12 +200,12 @@ int main()
         glm::mat4 model;
         model = glm::translate(model, cubePosition);
         model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.8f));
+        model = glm::scale(model, glm::vec3(4.0f));
         geometryShader.setMat4("model", model);
         // glDrawArrays(GL_TRIANGLES, 0, 36);
         // glDrawArrays(GL_LINES, 0, 36);
         // glDrawArrays(GL_LINES_ADJACENCY, 0, 36);
-        glDrawArrays(GL_POINTS, 0, 36);
+        glDrawArrays(GL_POINTS, 0, N*N);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
