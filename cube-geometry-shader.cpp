@@ -51,6 +51,7 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         clearScreen = !clearScreen;
 
+
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
         mouseLookOn = !mouseLookOn;
 
@@ -137,10 +138,10 @@ int main()
 
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    unsigned long N = 2000;
-    unsigned long size_points = N*N*3;
+    unsigned long N = 500;
+    unsigned long sizePoints = N*N*3;
     float *points;
-    points = new float[N*N*3];
+    points = new float[sizePoints];
 
     unsigned long idx=0;
     for (int i=0; i<N; i++) {
@@ -152,26 +153,14 @@ int main()
         }
     }
 
-    // {
-    // -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
-    //  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
-    //  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
-    // -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
-    // };
-    glBufferData(GL_ARRAY_BUFFER, size_points * sizeof(float), points, GL_STATIC_DRAW);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizePoints * sizeof(float), points, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(3* sizeof(float)));
     // glEnableVertexAttribArray(1);
-    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(6* sizeof(float)));
-    // glEnableVertexAttribArray(2);
-
-    // Shader lightingShader("shaders/brain-glow.vs", "shaders/brain-glow.fs");
 
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/passthru.gs");
-    // Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
 
     float t = 0;
 
@@ -193,13 +182,12 @@ int main()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-
         glm::mat4 view = camera.GetViewMatrix();
 
         // draw cube
         geometryShader.use();
-        geometryShader.setMat4("view", view);
         geometryShader.setMat4("projection", projection);
+        geometryShader.setMat4("view", view);
         geometryShader.setFloat("t", t);
         float rotationAngle = 3.4f * t;
 
@@ -211,11 +199,10 @@ int main()
         model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(100.0f));
         geometryShader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, N*N);
+        // glDrawArrays(GL_TRIANGLES, 0, N*N);
         // glDrawArrays(GL_LINES, 0, N*N);
         // glDrawArrays(GL_LINES_ADJACENCY, 0, 36);
-        // glDrawArrays(GL_POINTS, 0, N*N);
-
+        glDrawArrays(GL_TRIANGLES, 0, N*N);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

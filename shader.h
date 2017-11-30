@@ -9,6 +9,24 @@
 #include <sstream>
 #include <iostream>
 
+std::string readCode(const char* path) {
+    std::ifstream shaderFile;
+    std::string shaderStr;
+    const char *code;
+    shaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    try {
+        shaderFile.open(path);
+        std::stringstream shaderStream;
+        shaderStream << shaderFile.rdbuf();
+        shaderStr = shaderStream.str();
+        shaderFile.close();
+    }
+    catch(std::ifstream::failure e)
+    {
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+    }
+    return shaderStr;
+}
 
 class Shader
 {
@@ -18,46 +36,20 @@ public:
 
     // constructor reads and builds the shader
     //Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
-    Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = "")
+
+    Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
     {
-        // 1. retrieve the vertex/fragment source code from filePath
-        std::string vertexCode;
-        std::string fragmentCode;
-        std::string geometryCode;
-        std::ifstream vShaderFile;
-        std::ifstream fShaderFile;
-        std::ifstream gShaderFile;
-        // ensure ifstream objects can throw exceptions:
-        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-        try
-        {
-            // open files
-            vShaderFile.open(vertexPath);
-            fShaderFile.open(fragmentPath);
-            gShaderFile.open(geometryPath);
-            std::stringstream vShaderStream, fShaderStream, gShaderStream;
-            // read file's buffer contents into streams
-            vShaderStream << vShaderFile.rdbuf();
-            fShaderStream << fShaderFile.rdbuf();
-            gShaderStream << gShaderFile.rdbuf();
-            // close file handlers
-            vShaderFile.close();
-            fShaderFile.close();
-            gShaderFile.close();
-            // convert stream into string
-            vertexCode   = vShaderStream.str();
-            fragmentCode = fShaderStream.str();
-            geometryCode = gShaderStream.str();
-        }
-        catch(std::ifstream::failure e)
-        {
-            std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-        }
-        const char* vShaderCode = vertexCode.c_str();
-        const char* fShaderCode = fragmentCode.c_str();
-        const char* gShaderCode = geometryCode.c_str();
+        std::string vcode = readCode(vertexPath);
+        const char* vShaderCode = vcode.c_str();
+        std::string fcode = readCode(fragmentPath);
+        const char* fShaderCode = fcode.c_str();
+        std::string gcode = readCode(geometryPath);
+        const char* gShaderCode = gcode.c_str();
+
+        // std::cout << "\n---v---\n" << vShaderCode << "\n------\n";
+        // std::cout << "\n---f---\n" << fShaderCode << "\n------\n";
+        // std::cout << "\n---g---\n" << gShaderCode << "\n------\n";
+        // std::cout << code << std::endl;
         // 2. compile shaders
         unsigned int vertex, fragment, geometry;
         int success;
