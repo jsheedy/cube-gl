@@ -127,36 +127,49 @@ int main()
 {
     GLFWwindow* window = init(width, height);
 
+    float scale = 2.0f;
+
     unsigned int VBO;
-    glGenBuffers(1, &VBO);
-
     unsigned int cubeVAO;
-    // unsigned int lightVAO;
+    unsigned int N = 100;
+    unsigned int sizePoints = N*N*3;
+    unsigned int sizeIndices = sizePoints * 2 / 3;
 
-    glGenVertexArrays(1, &cubeVAO);
-    // glGenVertexArrays(1, &lightVAO);
-
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    unsigned long N = 500;
-    unsigned long sizePoints = N*N*3;
-    float *points;
-    points = new float[sizePoints];
+    float *points = new float[sizePoints];
+    unsigned int *pointIndices = new unsigned int[sizeIndices];
 
     unsigned long idx=0;
+    unsigned long pointIdx=0;
+
     for (int i=0; i<N; i++) {
         for (int j=0; j<N; j++) {
             // x-z plane
             points[idx++] = (((float)i)/N - 0.5f);
             points[idx++] = 0;
             points[idx++] = (((float)j)/N - 0.5f);
+
+            // indexes
+            if ((i % 2 == 0) && (j % 2 == 0)) {
+                pointIndices[pointIdx++] = i*N + j;
+                pointIndices[pointIdx++] = i*N + j + 1;
+                pointIndices[pointIdx++] = (i+1)*N;
+            }
         }
     }
 
+    glGenBuffers(1, &VBO);
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizePoints * sizeof(float), points, GL_STATIC_DRAW);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * sizeIndices, pointIndices, GL_STATIC_DRAW);
+
     // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(3* sizeof(float)));
     // glEnableVertexAttribArray(1);
 
@@ -191,18 +204,23 @@ int main()
         geometryShader.setFloat("t", t);
         float rotationAngle = 3.4f * t;
 
-        glBindVertexArray(cubeVAO);
-
         glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f,  0.0f);
         glm::mat4 model;
         model = glm::translate(model, cubePosition);
         model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(100.0f));
+        model = glm::scale(model, glm::vec3(scale));
         geometryShader.setMat4("model", model);
+
+        glBindVertexArray(cubeVAO);
         // glDrawArrays(GL_TRIANGLES, 0, N*N);
         // glDrawArrays(GL_LINES, 0, N*N);
         // glDrawArrays(GL_LINES_ADJACENCY, 0, 36);
-        glDrawArrays(GL_TRIANGLES, 0, N*N);
+        // glDrawArrays(GL_TRIANGLES, 0, N*N);
+
+        //EBO
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
