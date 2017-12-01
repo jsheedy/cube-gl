@@ -131,9 +131,10 @@ int main()
 
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 800;
-    unsigned int sizePoints = N*N*3;
-    unsigned int sizeIndices = sizePoints * 2 / 3;
+    unsigned int N = 50;
+    unsigned int M = 50;
+    unsigned int sizePoints = N*M*3;
+    unsigned int sizeIndices = sizePoints;// * 2 / 3;
 
     float *points = new float[sizePoints];
     unsigned int *pointIndices = new unsigned int[sizeIndices];
@@ -142,7 +143,7 @@ int main()
     unsigned long pointIdx=0;
 
     for (int i=0; i<N; i++) {
-        for (int j=0; j<N; j++) {
+        for (int j=0; j<M; j++) {
             // x-z plane
             points[idx++] = (((float)i)/N - 0.5f);
             points[idx++] = 0;
@@ -152,7 +153,7 @@ int main()
             if ((i % 2 == 0)) {
                 pointIndices[pointIdx++] = 3*(i*N + j);
                 pointIndices[pointIdx++] = 3*(i*N + j + 1);
-                pointIndices[pointIdx++] = 3*((i+i)*N);
+                pointIndices[pointIdx++] = 3*((i+i)*N + j);
             }
         }
     }
@@ -180,7 +181,7 @@ int main()
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
-    camera.MovementSpeed = 10.0f;
+    camera.MovementSpeed = 7.0f;
 
     while(!glfwWindowShouldClose(window))
     {
@@ -208,7 +209,7 @@ int main()
         glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f,  0.0f);
         glm::mat4 model;
         model = glm::translate(model, cubePosition);
-        model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(scale));
         geometryShader.setMat4("model", model);
 
