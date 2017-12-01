@@ -131,7 +131,7 @@ int main()
 
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 100;
+    unsigned int N = 800;
     unsigned int sizePoints = N*N*3;
     unsigned int sizeIndices = sizePoints * 2 / 3;
 
@@ -149,10 +149,10 @@ int main()
             points[idx++] = (((float)j)/N - 0.5f);
 
             // indexes
-            if ((i % 2 == 0) && (j % 2 == 0)) {
-                pointIndices[pointIdx++] = i*N + j;
-                pointIndices[pointIdx++] = i*N + j + 1;
-                pointIndices[pointIdx++] = (i+1)*N;
+            if ((i % 2 == 0)) {
+                pointIndices[pointIdx++] = 3*(i*N + j);
+                pointIndices[pointIdx++] = 3*(i*N + j + 1);
+                pointIndices[pointIdx++] = 3*((i+i)*N);
             }
         }
     }
@@ -173,7 +173,8 @@ int main()
     // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(3* sizeof(float)));
     // glEnableVertexAttribArray(1);
 
-    Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/passthru.gs");
+    Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
+    // Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/passthru.gs");
 
     float t = 0;
 
@@ -202,7 +203,7 @@ int main()
         geometryShader.setMat4("projection", projection);
         geometryShader.setMat4("view", view);
         geometryShader.setFloat("t", t);
-        float rotationAngle = 3.4f * t;
+        float rotationAngle = 1.0f * t;
 
         glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f,  0.0f);
         glm::mat4 model;
@@ -212,14 +213,9 @@ int main()
         geometryShader.setMat4("model", model);
 
         glBindVertexArray(cubeVAO);
-        // glDrawArrays(GL_TRIANGLES, 0, N*N);
-        // glDrawArrays(GL_LINES, 0, N*N);
-        // glDrawArrays(GL_LINES_ADJACENCY, 0, 36);
-        // glDrawArrays(GL_TRIANGLES, 0, N*N);
-
-        //EBO
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
+        // glDrawElements(GL_LINES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
