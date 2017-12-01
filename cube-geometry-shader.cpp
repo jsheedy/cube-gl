@@ -127,14 +127,14 @@ int main()
 {
     GLFWwindow* window = init(width, height);
 
-    float scale = 2.0f;
+    float scale = 20.0f;
 
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 50;
-    unsigned int M = 50;
+    unsigned int N = 100;
+    unsigned int M = 400;
     unsigned int sizePoints = N*M*3;
-    unsigned int sizeIndices = sizePoints;// * 2 / 3;
+    unsigned int sizeIndices = sizePoints * 2 / 3;
 
     float *points = new float[sizePoints];
     unsigned int *pointIndices = new unsigned int[sizeIndices];
