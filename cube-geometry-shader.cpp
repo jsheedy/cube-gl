@@ -29,6 +29,8 @@ bool mouseLookOn = false;
 float lastX;
 float lastY;
 
+float scale = 1.0f;
+
 Camera camera = Camera(
     glm::vec3(0.0f, 3.0f, 0.01f),
     glm::vec3(0.0f, 1.0f, 0.0f),
@@ -136,12 +138,10 @@ int main()
 
     camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
 
-    float scale = 2.0f;
-
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 10;
-    unsigned int M = 10;
+    unsigned int N = 700;
+    unsigned int M = 700;
     unsigned int sizePoints = N*M*3;
     unsigned int sizeIndices = sizePoints * 2 - M - N;
 

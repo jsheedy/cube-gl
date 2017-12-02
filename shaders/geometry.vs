@@ -16,4 +16,5 @@ void main()
     // y = 0.0;
     // y = aPos.x * aPos.z;
     gl_Position = vec4(aPos.x, y, aPos.z, 1.0);
+    // gl_Position = vec4(aPos.x + (sin(t+aPos.z*10)) / 10, y, aPos.z, 1.0);
 }
