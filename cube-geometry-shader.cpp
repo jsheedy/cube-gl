@@ -25,12 +25,12 @@ int height = 900;
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 bool clearScreen = true;
-bool mouseLookOn = true;
+bool mouseLookOn = false;
 float lastX;
 float lastY;
 
 Camera camera = Camera(
-    glm::vec3(0.0f, 1.0f, 2.0f),
+    glm::vec3(0.0f, 3.0f, 0.01f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     -90.0f,
     -20.0f
@@ -54,6 +54,12 @@ void processInput(GLFWwindow *window)
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
         mouseLookOn = !mouseLookOn;
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
+        camera.MovementSpeed *= 1.2;
+
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
+        camera.MovementSpeed /= 1.2;
 
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         camera.ProcessKeyboard(UP, deltaTime);
@@ -95,6 +101,7 @@ GLFWwindow* init(int width, int height)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GL_FALSE);
     #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
     #endif
@@ -127,14 +134,16 @@ int main()
 {
     GLFWwindow* window = init(width, height);
 
-    float scale = 20.0f;
+    camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
+
+    float scale = 2.0f;
 
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 100;
-    unsigned int M = 400;
+    unsigned int N = 20;
+    unsigned int M = 20;
     unsigned int sizePoints = N*M*3;
-    unsigned int sizeIndices = sizePoints * 2 / 3;
+    unsigned int sizeIndices = sizePoints;// * 2 / 3;
 
     float *points = new float[sizePoints];
     unsigned int *pointIndices = new unsigned int[sizeIndices];
@@ -147,14 +156,15 @@ int main()
             // x-z plane
             points[idx++] = (((float)i)/N - 0.5f);
             points[idx++] = 0;
-            points[idx++] = (((float)j)/N - 0.5f);
+            points[idx++] = (((float)j)/M - 0.5f);
 
             // indexes
-            if ((i % 2 == 0)) {
-                pointIndices[pointIdx++] = 3*(i*N + j);
-                pointIndices[pointIdx++] = 3*(i*N + j + 1);
-                pointIndices[pointIdx++] = 3*((i+i)*N + j);
+            if (i < (N-1) && j < (M-1)) {
+            pointIndices[pointIdx++] = (i*M + j);
+            pointIndices[pointIdx++] = (i*M + j + 1);
+            pointIndices[pointIdx++] = ((i+1)*M + j);
             }
+
         }
     }
 
@@ -181,7 +191,7 @@ int main()
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
-    camera.MovementSpeed = 7.0f;
+    camera.MovementSpeed = 0.8f;
 
     while(!glfwWindowShouldClose(window))
     {
@@ -218,7 +228,11 @@ int main()
         glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
         // glDrawElements(GL_LINES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
 
-        glfwSwapBuffers(window);
+        // double buffering
+        // glfwSwapBuffers(window);
+        // single buffering;
+        glFlush();
+
         glfwPollEvents();
     }
 

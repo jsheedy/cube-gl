@@ -3,6 +3,7 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices=3) out;
 
+out vec3 fragPos;
 out vec3 normal;
 
 uniform mat4 model;
@@ -16,6 +17,8 @@ void main() {
 
     vec3 a = vec3(v2 - v1);
     vec3 b = vec3(v3 - v1);
+
+    fragPos = vec3(model * gl_in[0].gl_Position);
 
     normal = normalize(cross(a,b));
 

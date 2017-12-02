@@ -119,6 +119,14 @@ public:
             Zoom = 45.0f;
     }
 
+    void LookAt(glm::vec3 target) {
+        glm::vec3 forward = target - Position;
+        Front = glm::normalize(forward);
+        // Also re-calculate the Right and Up vector
+        Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+        Up    = glm::normalize(glm::cross(Right, Front));
+    }
+
 private:
     // Calculates the front vector from the Camera's (updated) Eular Angles
     void updateCameraVectors()
@@ -128,6 +136,7 @@ private:
         front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
         front.y = sin(glm::radians(Pitch));
         front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+
         Front = glm::normalize(front);
         // Also re-calculate the Right and Up vector
         Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
