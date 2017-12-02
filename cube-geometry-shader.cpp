@@ -140,10 +140,10 @@ int main()
 
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 20;
-    unsigned int M = 20;
+    unsigned int N = 10;
+    unsigned int M = 10;
     unsigned int sizePoints = N*M*3;
-    unsigned int sizeIndices = sizePoints;// * 2 / 3;
+    unsigned int sizeIndices = sizePoints * 2 - M - N;
 
     float *points = new float[sizePoints];
     unsigned int *pointIndices = new unsigned int[sizeIndices];
@@ -160,11 +160,17 @@ int main()
 
             // indexes
             if (i < (N-1) && j < (M-1)) {
-            pointIndices[pointIdx++] = (i*M + j);
-            pointIndices[pointIdx++] = (i*M + j + 1);
-            pointIndices[pointIdx++] = ((i+1)*M + j);
-            }
 
+                // triangle 1
+                pointIndices[pointIdx++] = (i*M + j);
+                pointIndices[pointIdx++] = (i*M + j + 1);
+                pointIndices[pointIdx++] = ((i+1)*M + j);
+
+                // triangle 2
+                pointIndices[pointIdx++] = (i*M + j + 1);
+                pointIndices[pointIdx++] = ((i+1)*M + j + 1);
+                pointIndices[pointIdx++] = ((i+1)*M + j);
+            }
         }
     }
 
