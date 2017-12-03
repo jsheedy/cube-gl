@@ -1,12 +1,21 @@
-#include <iostream>
+// std stuff
 #include <cmath>
+#include <iostream>
+#include <vector>
+
+// OSC stuff
+#include <atomic>
+#include <lo/lo.h>
+#include <lo/lo_cpp.h>
+
+// GL stuff
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <vector>
+
+// local stuff
 #include "shader.h"
 #include "camera.h"
 #include "textures.h"
@@ -16,8 +25,11 @@ using std::cout;
 using std::endl;
 using std::vector;
 
+#define PORT 37341
+
 int width = 1400;
 int height = 900;
+
 
 // int width = 1920;
 // int height = 1080;
@@ -197,14 +209,63 @@ int main()
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
-    camera.MovementSpeed = 0.8f;
+    camera.MovementSpeed = 1.2f;
+
+    std::vector<int> oscQueue;
+
+    // OSC megahack
+    lo::ServerThread st(PORT);
+    if (!st.is_valid()) {
+        std::cout << "couldn't start OSC server" << std::endl;
+        return 1;
+    }
+
+    // set up lambda callbacks
+    st.set_callbacks([&st]() { printf("OSC THREAD INIT: %p\n", &st);},
+        []() {printf("OSC THREAD CLEANUP\n");});
+
+    std::cout << "URL: " << st.url() << std::endl;
+
+    // number of msgs received. use atomic
+    std::atomic<int> received(0);
+
+    st.add_method("/midi/note", "iii",
+        [&received](lo_arg **argv, int)
+        {std::cout << "/midi/note (" << (++received) << "): "
+            << " note: " << argv[0]->i
+            << " velocity: " << argv[1]->i
+            << " channel: " << argv[2]->i
+            << std::endl;});
+
+    st.add_method("/metronome", "ii",
+        [&received, &oscQueue](lo_arg **argv, int)
+        {
+            int bpm = argv[0]->i;
+            std::cout << "/metronome (" << (++received) << "): "
+            << " bpm: " << bpm
+            << " beat: " << argv[1]->i
+            << std::endl;
+            oscQueue.push_back(bpm);
+        });
+
+    st.start();
+    // OSC megahack
+
+    float pulseHeight = 0.0f;
 
     while(!glfwWindowShouldClose(window))
     {
+        if (!oscQueue.empty()) {
+            int rv = oscQueue.back();
+            oscQueue.pop_back();
+            std::cout << "OSC: " << rv << std::endl;
+            pulseHeight = 1.0f;
+        }
         t = glfwGetTime();
         deltaTime = t - lastFrame;
         lastFrame = t;
 
+        pulseHeight *= 0.95f; // FIXME: use times Time.deltaTime
         processInput(window);
 
         if (clearScreen) {
@@ -220,6 +281,7 @@ int main()
         geometryShader.setMat4("projection", projection);
         geometryShader.setMat4("view", view);
         geometryShader.setFloat("t", t);
+        geometryShader.setFloat("pulseHeight", pulseHeight);
         float rotationAngle = 1.0f * t;
 
         glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f,  0.0f);
