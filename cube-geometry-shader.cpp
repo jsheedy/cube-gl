@@ -146,19 +146,17 @@ int main()
     OSCServer oscServer(37341);
     oscServer.start();
 
-    camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
-
+    // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
-
-    float t = 0;
+    Plane plane = Plane(N, M);
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
     camera.MovementSpeed = 1.2f;
+    camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
 
+    float t = 0;
     float pulseHeight = 0.0f;
-
-    Plane plane = Plane(N, M);
 
     while(!glfwWindowShouldClose(window))
     {
