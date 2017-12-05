@@ -16,6 +16,7 @@
 #include "textures.h"
 #include "cube_vertices.h"
 #include "osc.hpp"
+#include "objects.hpp"
 
 using std::cout;
 using std::endl;
@@ -147,53 +148,6 @@ int main()
 
     camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
 
-    unsigned int VBO;
-    unsigned int cubeVAO;
-    unsigned int sizePoints = N*M*3;
-    unsigned int sizeIndices = sizePoints * 2 - M - N;
-
-    float *points = new float[sizePoints];
-    unsigned int *pointIndices = new unsigned int[sizeIndices];
-
-    unsigned long idx=0;
-    unsigned long pointIdx=0;
-
-    for (int i=0; i<N; i++) {
-        for (int j=0; j<M; j++) {
-            // x-z plane
-            points[idx++] = (((float)i)/N - 0.5f);
-            points[idx++] = 0;
-            points[idx++] = (((float)j)/M - 0.5f);
-
-            // indexes
-            if (i < (N-1) && j < (M-1)) {
-
-                // triangle 1
-                pointIndices[pointIdx++] = (i*M + j);
-                pointIndices[pointIdx++] = (i*M + j + 1);
-                pointIndices[pointIdx++] = ((i+1)*M + j);
-
-                // triangle 2
-                pointIndices[pointIdx++] = (i*M + j + 1);
-                pointIndices[pointIdx++] = ((i+1)*M + j + 1);
-                pointIndices[pointIdx++] = ((i+1)*M + j);
-            }
-        }
-    }
-
-    glGenBuffers(1, &VBO);
-    glGenVertexArrays(1, &cubeVAO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizePoints * sizeof(float), points, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * sizeIndices, pointIndices, GL_STATIC_DRAW);
-
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
 
     float t = 0;
@@ -203,6 +157,8 @@ int main()
     camera.MovementSpeed = 1.2f;
 
     float pulseHeight = 0.0f;
+
+    Plane plane = Plane(N, M);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -217,7 +173,7 @@ int main()
         deltaTime = t - lastFrame;
         lastFrame = t;
 
-        pulseHeight *= 0.95f; // FIXME: use times Time.deltaTime
+        pulseHeight *= 0.95f;//60.0f * deltaTime;
         processInput(window);
 
         if (clearScreen) {
@@ -237,17 +193,14 @@ int main()
         geometryShader.setFloat("pulseHeight", pulseHeight);
         float rotationAngle = 1.0f * t;
 
-        glm::vec3 cubePosition = glm::vec3(0.0f, 0.0f,  0.0f);
+        glm::vec3 pos = glm::vec3(0.0f, 0.0f,  0.0f);
         glm::mat4 model;
-        model = glm::translate(model, cubePosition);
+        model = glm::translate(model, pos);
         // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::scale(model, glm::vec3(scale, scale, scale));
         geometryShader.setMat4("model", model);
 
-        glBindVertexArray(cubeVAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
-        // glDrawElements(GL_LINES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
+        plane.draw();
 
         // double buffering
         // glfwSwapBuffers(window);
