@@ -6,14 +6,14 @@ class Geometry {};
 class Plane: Geometry {
     private:
 
+
+
+    public:
         unsigned int sizeIndices;
         unsigned int sizePoints;
 
         unsigned int VBO;
         unsigned int EBO;
-
-    public:
-
     Plane(int N, int M) {
 
         unsigned int cubeVAO;
@@ -61,7 +61,6 @@ class Plane: Geometry {
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * sizeIndices, pointIndices, GL_STATIC_DRAW);
-
     }
 
     void draw() {
