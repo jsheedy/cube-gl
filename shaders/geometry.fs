@@ -12,5 +12,10 @@ void main()
     float diff = max(dot(normal, lightDir), 0.0);
     // FragColor = vec4(sin(fragPos.x), cos(fragPos.y), fragPos.z, fragPos.x);
     // FragColor = vec4(fragPos.x,diff, 0, 0);
-    FragColor = vec4(0, diff, 0, 0);
+    FragColor = vec4(
+        diff * (sin(fragPos.x)/3.0 + 0.5),
+        0.2,
+        diff * sin(fragPos.y) * (sin(t/100.0)/3.0 + 0.5),
+        0
+    );
 }

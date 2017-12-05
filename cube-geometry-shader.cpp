@@ -26,7 +26,8 @@ using std::endl;
 using std::vector;
 
 #define PORT 37341
-
+unsigned int N = 100;
+unsigned int M = 100;
 int width = 1400;
 int height = 900;
 
@@ -41,10 +42,10 @@ bool mouseLookOn = false;
 float lastX;
 float lastY;
 
-float scale = 1.0f;
+float scale = 100.0f;
 
 Camera camera = Camera(
-    glm::vec3(0.0f, 3.0f, 0.01f),
+    glm::vec3(0.0f, 0.4f, 1.1f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     -90.0f,
     -20.0f
@@ -152,8 +153,6 @@ int main()
 
     unsigned int VBO;
     unsigned int cubeVAO;
-    unsigned int N = 700;
-    unsigned int M = 700;
     unsigned int sizePoints = N*M*3;
     unsigned int sizeIndices = sizePoints * 2 - M - N;
 
@@ -212,6 +211,7 @@ int main()
     camera.MovementSpeed = 1.2f;
 
     std::vector<int> oscQueue;
+    std::vector<float> oscEnvQueue;
 
     // OSC megahack
     lo::ServerThread st(PORT);
@@ -221,8 +221,8 @@ int main()
     }
 
     // set up lambda callbacks
-    st.set_callbacks([&st]() { printf("OSC THREAD INIT: %p\n", &st);},
-        []() {printf("OSC THREAD CLEANUP\n");});
+    // st.set_callbacks([&st]() { printf("OSC THREAD INIT: %p\n", &st);},
+    //     []() {printf("OSC THREAD CLEANUP\n");});
 
     std::cout << "URL: " << st.url() << std::endl;
 
@@ -230,22 +230,40 @@ int main()
     std::atomic<int> received(0);
 
     st.add_method("/midi/note", "iii",
-        [&received](lo_arg **argv, int)
-        {std::cout << "/midi/note (" << (++received) << "): "
-            << " note: " << argv[0]->i
-            << " velocity: " << argv[1]->i
-            << " channel: " << argv[2]->i
-            << std::endl;});
+        [&received, &oscQueue](lo_arg **argv, int)
+        {
+            if (argv[2]->i == 1 ) {
+            // if (argv[2]->i == 1 && argv[0]->i == 36) {
+                oscQueue.push_back(argv[1]->i);
+            }
+            // std::cout << "/midi/note (" << (++received) << "): "
+            // << " note: " << argv[0]->i
+            // << " velocity: " << argv[1]->i
+            // << " channel: " << argv[2]->i
+            // << std::endl;
+            });
 
     st.add_method("/metronome", "ii",
         [&received, &oscQueue](lo_arg **argv, int)
         {
             int bpm = argv[0]->i;
-            std::cout << "/metronome (" << (++received) << "): "
-            << " bpm: " << bpm
-            << " beat: " << argv[1]->i
-            << std::endl;
-            oscQueue.push_back(bpm);
+            // std::cout << "/metronome (" << (++received) << "): "
+            // << " bpm: " << bpm
+            // << " beat: " << argv[1]->i
+            // << std::endl;
+            // oscQueue.push_back(bpm);
+        });
+
+    st.add_method("/audio/envelope", "ff",
+        [&received, &oscEnvQueue](lo_arg **argv, int)
+        {
+            float val = argv[0]->f;
+            int channel = argv[0]->i;
+            // std::cout << "/metronome (" << (++received) << "): "
+            // << " bpm: " << bpm
+            // << " beat: " << argv[1]->i
+            // << std::endl;
+            oscEnvQueue.push_back(val);
         });
 
     st.start();
@@ -255,17 +273,24 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
-        if (!oscQueue.empty()) {
-            int rv = oscQueue.back();
-            oscQueue.pop_back();
-            std::cout << "OSC: " << rv << std::endl;
-            pulseHeight = 1.0f;
+        // if (!oscQueue.empty()) {
+        //     int rv = oscQueue.back();
+        //     oscQueue.pop_back();
+        //     std::cout << "OSC: " << rv << std::endl;
+        //     pulseHeight = 1.0f;
+        // }
+
+        if (!oscEnvQueue.empty()) {
+            pulseHeight = oscEnvQueue.back();
+            oscEnvQueue.pop_back();
+            // std::cout << "OSC: " << rv << std::endl;
         }
+
         t = glfwGetTime();
         deltaTime = t - lastFrame;
         lastFrame = t;
 
-        pulseHeight *= 0.95f; // FIXME: use times Time.deltaTime
+        // pulseHeight *= 0.90f; // FIXME: use times Time.deltaTime
         processInput(window);
 
         if (clearScreen) {
@@ -281,6 +306,7 @@ int main()
         geometryShader.setMat4("projection", projection);
         geometryShader.setMat4("view", view);
         geometryShader.setFloat("t", t);
+        geometryShader.setFloat("f", 10.0f);
         geometryShader.setFloat("pulseHeight", pulseHeight);
         float rotationAngle = 1.0f * t;
 
@@ -288,7 +314,7 @@ int main()
         glm::mat4 model;
         model = glm::translate(model, cubePosition);
         // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(scale));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
         geometryShader.setMat4("model", model);
 
         glBindVertexArray(cubeVAO);
