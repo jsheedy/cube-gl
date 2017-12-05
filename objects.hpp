@@ -1,6 +1,11 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
+// no idea which of these I need to get glm::vec3
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 class Geometry {};
 
 class Plane: Geometry {
@@ -14,6 +19,10 @@ class Plane: Geometry {
 
         unsigned int VBO;
         unsigned int EBO;
+
+        glm::vec3 Position = glm::vec3(0.0f, 0.0f,  0.0f);
+
+
     Plane(int N, int M) {
 
         unsigned int cubeVAO;

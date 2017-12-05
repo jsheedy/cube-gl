@@ -10,7 +10,6 @@ float t = 0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
-
 float lastX;
 float lastY;
 
@@ -20,8 +19,7 @@ bool mouseLookOn = false;
 GLFWwindow* window;
 
 Camera camera = Camera(
-    glm::vec3(0.0f, 1.0f, 0.1f),
-    // glm::vec3(0.0f, 0.4f, 1.1f),
+    glm::vec3(0.0f, 1.0f, 10.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     -90.0f,
     -20.0f

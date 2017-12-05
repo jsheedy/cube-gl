@@ -14,14 +14,29 @@
 #include <lo/lo_cpp.h>
 
 #define PORT 37341
-#define CHANNELS 16;
+#define CHANNELS 16
 
 struct MetronomeEvent {
     int bpm;
+    int beat;
     float t;
     bool handled;
-    MetronomeEvent(int b) {
-        bpm = b;
+    MetronomeEvent(int _bpm, int _beat) {
+        bpm = _bpm;
+        beat = _beat;
+        long now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        handled = false;
+    }
+};
+
+struct MidiNoteEvent {
+    int note;
+    int velocity;
+    bool handled;
+
+    MidiNoteEvent(int n, int v) {
+        note = n;
+        velocity = v;
         long now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
         handled = false;
     }
@@ -34,28 +49,27 @@ class OSCServer {
 
     public:
 
-    std::vector<int> metronomeQueue;
+    std::vector<MetronomeEvent> metronomeQueue;
     // std::vector<float>[16] envQueue;
-    std::vector<float> midiNoteQueue[16];
+    std::vector<MidiNoteEvent> midiNoteQueue[CHANNELS];
 
     OSCServer(int port): st(port) {};
 
     void start() {
 
-        // OSC megahack
         if (!st.is_valid()) {
             std::cout << "couldn't start OSC server" << std::endl;
             return ;
         }
 
         // set up lambda callbacks
-        // st.set_callbacks([&st]() { printf("OSC THREAD INIT: %p\n", &st);},
-        //     []() {printf("OSC THREAD CLEANUP\n");});
+        st.set_callbacks([this]() { printf("OSC THREAD INIT: %p\n", this);},
+            []() {printf("OSC THREAD CLEANUP\n");});
 
-        std::cout << "URL: " << st.url() << std::endl;
+        std::cout << "OSC URL: " << st.url() << std::endl;
 
-        // number of msgs received. use atomic
-        std::atomic<int> received(0);
+        // number of msgs received
+        std::atomic<unsigned int> received(0);
 
         st.add_method("/midi/note", "iii",
             [&received, this](lo_arg **argv, int)
@@ -64,22 +78,30 @@ class OSCServer {
                 int velocity = argv[1]->i;
                 int channel = argv[2]->i;
 
-                if (argv[2]->i == 1 && argv[0]->i == 36) {
-                    this->midiNoteQueue[channel].push_back(velocity);
-                }
-                // std::cout << "/midi/note (" << (++received) << "): "
-                // << std::endl;
+                MidiNoteEvent event(note, velocity);
+                this->midiNoteQueue[channel].push_back(event);
+
+                std::cout << "/midi/note (" << (++received) << "): "
+                << " note: " << note
+                << " velocity: " << velocity
+                << " channel: " << channel
+                << std::endl;
                 });
 
         st.add_method("/metronome", "ii",
             [&received, this](lo_arg **argv, int)
             {
                 int bpm = argv[0]->i;
+                int beat = argv[0]->i;
+
                 std::cout << "/metronome (" << (++received) << "): "
                 << " bpm: " << bpm
-                << " beat: " << argv[1]->i
+                << " beat: " << beat
                 << std::endl;
-                this->metronomeQueue.push_back(bpm);
+
+                MetronomeEvent event(bpm, beat);
+                this->metronomeQueue.push_back(event);
+
             });
 
         // st.add_method("/audio/envelope", "ff",
