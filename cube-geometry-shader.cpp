@@ -3,11 +3,6 @@
 #include <iostream>
 #include <vector>
 
-// OSC stuff
-#include <atomic>
-#include <lo/lo.h>
-#include <lo/lo_cpp.h>
-
 // GL stuff
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -20,17 +15,16 @@
 #include "camera.h"
 #include "textures.h"
 #include "cube_vertices.h"
+#include "osc.hpp"
 
 using std::cout;
 using std::endl;
 using std::vector;
 
-#define PORT 37341
 unsigned int N = 100;
 unsigned int M = 100;
 int width = 1400;
 int height = 900;
-
 
 // int width = 1920;
 // int height = 1080;
@@ -45,7 +39,8 @@ float lastY;
 float scale = 100.0f;
 
 Camera camera = Camera(
-    glm::vec3(0.0f, 0.4f, 1.1f),
+    glm::vec3(0.0f, 100.0f, 0.1f),
+    // glm::vec3(0.0f, 0.4f, 1.1f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     -90.0f,
     -20.0f
@@ -65,7 +60,6 @@ void processInput(GLFWwindow *window)
 
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         clearScreen = !clearScreen;
-
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
         mouseLookOn = !mouseLookOn;
@@ -148,6 +142,8 @@ GLFWwindow* init(int width, int height)
 int main()
 {
     GLFWwindow* window = init(width, height);
+    OSCServer oscServer(37341);
+    oscServer.start();
 
     camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
 
@@ -198,11 +194,7 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * sizeIndices, pointIndices, GL_STATIC_DRAW);
 
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)(3* sizeof(float)));
-    // glEnableVertexAttribArray(1);
-
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
-    // Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/passthru.gs");
 
     float t = 0;
 
@@ -210,87 +202,22 @@ int main()
     projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
     camera.MovementSpeed = 1.2f;
 
-    std::vector<int> oscQueue;
-    std::vector<float> oscEnvQueue;
-
-    // OSC megahack
-    lo::ServerThread st(PORT);
-    if (!st.is_valid()) {
-        std::cout << "couldn't start OSC server" << std::endl;
-        return 1;
-    }
-
-    // set up lambda callbacks
-    // st.set_callbacks([&st]() { printf("OSC THREAD INIT: %p\n", &st);},
-    //     []() {printf("OSC THREAD CLEANUP\n");});
-
-    std::cout << "URL: " << st.url() << std::endl;
-
-    // number of msgs received. use atomic
-    std::atomic<int> received(0);
-
-    st.add_method("/midi/note", "iii",
-        [&received, &oscQueue](lo_arg **argv, int)
-        {
-            if (argv[2]->i == 1 ) {
-            // if (argv[2]->i == 1 && argv[0]->i == 36) {
-                oscQueue.push_back(argv[1]->i);
-            }
-            // std::cout << "/midi/note (" << (++received) << "): "
-            // << " note: " << argv[0]->i
-            // << " velocity: " << argv[1]->i
-            // << " channel: " << argv[2]->i
-            // << std::endl;
-            });
-
-    st.add_method("/metronome", "ii",
-        [&received, &oscQueue](lo_arg **argv, int)
-        {
-            int bpm = argv[0]->i;
-            // std::cout << "/metronome (" << (++received) << "): "
-            // << " bpm: " << bpm
-            // << " beat: " << argv[1]->i
-            // << std::endl;
-            // oscQueue.push_back(bpm);
-        });
-
-    st.add_method("/audio/envelope", "ff",
-        [&received, &oscEnvQueue](lo_arg **argv, int)
-        {
-            float val = argv[0]->f;
-            int channel = argv[0]->i;
-            // std::cout << "/metronome (" << (++received) << "): "
-            // << " bpm: " << bpm
-            // << " beat: " << argv[1]->i
-            // << std::endl;
-            oscEnvQueue.push_back(val);
-        });
-
-    st.start();
-    // OSC megahack
-
     float pulseHeight = 0.0f;
 
     while(!glfwWindowShouldClose(window))
     {
-        // if (!oscQueue.empty()) {
-        //     int rv = oscQueue.back();
-        //     oscQueue.pop_back();
-        //     std::cout << "OSC: " << rv << std::endl;
-        //     pulseHeight = 1.0f;
-        // }
-
-        if (!oscEnvQueue.empty()) {
-            pulseHeight = oscEnvQueue.back();
-            oscEnvQueue.pop_back();
-            // std::cout << "OSC: " << rv << std::endl;
+        if (!oscServer.metronomeQueue.empty()) {
+            int rv = oscServer.metronomeQueue.back();
+            oscServer.metronomeQueue.pop_back();
+            std::cout << "bpm: " << rv << std::endl;
+            pulseHeight = 1.0f;
         }
 
         t = glfwGetTime();
         deltaTime = t - lastFrame;
         lastFrame = t;
 
-        // pulseHeight *= 0.90f; // FIXME: use times Time.deltaTime
+        pulseHeight *= 0.95f; // FIXME: use times Time.deltaTime
         processInput(window);
 
         if (clearScreen) {
@@ -326,7 +253,6 @@ int main()
         // glfwSwapBuffers(window);
         // single buffering;
         glFlush();
-
         glfwPollEvents();
     }
 
