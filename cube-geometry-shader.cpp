@@ -16,8 +16,8 @@
 #include "scene.hpp"
 
 
-unsigned int N = 800;
-unsigned int M = 800;
+unsigned int N = 50;
+unsigned int M = 50;
 
 int main()
 {
@@ -28,7 +28,7 @@ int main()
     camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
 
     OSCServer oscServer(37341);
-    oscServer.start();
+    // oscServer.start();
 
     // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
@@ -37,7 +37,7 @@ int main()
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
     float pulseHeight = 0.0f;
-    float scale = 1000.0f;
+    float scale = 200.0f;
 
     std::vector<MidiNoteEvent> *kickQueue = &oscServer.midiNoteQueue[2];
     std::vector<MetronomeEvent> *metronomeQueue = &oscServer.metronomeQueue;
