@@ -32,7 +32,8 @@ int main()
 
     // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
-    Shader lineShader("shaders/lines.vs", "shaders/lines.fs", "shaders/passthru-lines.gs");
+    Shader lineShader("shaders/lines.vs", "shaders/lines-blue.fs", "shaders/lines-wide.gs");
+    // Shader lineShader("shaders/lines.vs", "shaders/lines.fs", "shaders/passthru-lines.gs");
     Plane plane = Plane(N, M);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
@@ -96,9 +97,7 @@ int main()
 
         lineShader.setFloat("t", t);
         lineShader.setFloat("pulseHeight", pulseHeight);
-        lineShader.setMat4("projection", projection);
-        lineShader.setMat4("view", view);
-        lineShader.setMat4("model", model);
+        lineShader.setMat4("MVP", projection * view * model);
 
         // if ((int)t % 2 == 0)
             plane.drawLines();

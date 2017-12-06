@@ -22,5 +22,6 @@ void main()
     float term2 = pow(aPos.z - z0, 2.0)/(2.0*sigmaSq);
     float gaussian = A * pow(e, -(term1 + term2));
 
-    gl_Position = projection * view * model * vec4(aPos.x, gaussian, aPos.z, 1.0);
+    gl_Position = vec4(aPos.x, gaussian, aPos.z, 1.0);
+    // gl_Position = projection * view * model * vec4(aPos.x, gaussian, aPos.z, 1.0);
 }
