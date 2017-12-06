@@ -76,4 +76,14 @@ class Plane: Geometry {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
         glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
     }
+
+    void drawPoints() {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+        glDrawElements(GL_POINTS, sizeIndices, GL_UNSIGNED_INT, (void*)0);
+    }
+
+    void drawLines() {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+        glDrawElements(GL_LINES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
+    }
 };

@@ -3,8 +3,9 @@
 out vec4 FragColor;
 
 uniform float t;
+uniform float pulseHeight;
 
 void main()
 {
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    FragColor = vec4(0.2, 1.0, 0.2, 1.0);
 }

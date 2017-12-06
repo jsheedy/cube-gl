@@ -42,6 +42,17 @@ struct MidiNoteEvent {
     }
 };
 
+struct EnvelopeEvent {
+    float value;
+    bool handled;
+
+    EnvelopeEvent(float v) {
+        value = v;
+        long now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        handled = false;
+    }
+};
+
 class OSCServer {
 
     private:
@@ -50,8 +61,8 @@ class OSCServer {
     public:
 
     std::vector<MetronomeEvent> metronomeQueue;
-    // std::vector<float>[16] envQueue;
     std::vector<MidiNoteEvent> midiNoteQueue[CHANNELS];
+    std::vector<EnvelopeEvent> envelopeQueue[CHANNELS];
 
     OSCServer(int port): st(port) {};
 
@@ -81,43 +92,41 @@ class OSCServer {
                 MidiNoteEvent event(note, velocity);
                 this->midiNoteQueue[channel].push_back(event);
 
-                std::cout << "/midi/note (" << (++received) << "): "
-                << " note: " << note
-                << " velocity: " << velocity
-                << " channel: " << channel
-                << std::endl;
+                // std::cout << "/midi/note (" << (++received) << "): "
+                // << " note: " << note
+                // << " velocity: " << velocity
+                // << " channel: " << channel
+                // << std::endl;
+
                 });
 
         st.add_method("/metronome", "ii",
             [&received, this](lo_arg **argv, int)
             {
                 int bpm = argv[0]->i;
-                int beat = argv[0]->i;
+                int beat = argv[1]->i;
 
-                std::cout << "/metronome (" << (++received) << "): "
-                << " bpm: " << bpm
-                << " beat: " << beat
-                << std::endl;
+                // std::cout << "/metronome (" << (++received) << "): "
+                // << " bpm: " << bpm
+                // << " beat: " << beat
+                // << std::endl;
 
                 MetronomeEvent event(bpm, beat);
                 this->metronomeQueue.push_back(event);
 
             });
 
-        // st.add_method("/audio/envelope", "ff",
-        //     [&received, &this.oscEnvQueue](lo_arg **argv, int)
-        //     {
-        //         float val = argv[0]->f;
-        //         int channel = argv[0]->i;
-        //         // std::cout << "/metronome (" << (++received) << "): "
-        //         // << " bpm: " << bpm
-        //         // << " beat: " << argv[1]->i
-        //         // << std::endl;
-        //         oscEnvQueue.push_back(val);
-        //     });
+        st.add_method("/audio/envelope", "fi",
+            [&received, this](lo_arg **argv, int)
+            {
+                float val = argv[0]->f;
+                int channel = argv[1]->i;
+
+                EnvelopeEvent event(val);
+                envelopeQueue[channel].push_back(event);
+            });
 
         st.start();
-        // OSC megahack
     }
 };
 

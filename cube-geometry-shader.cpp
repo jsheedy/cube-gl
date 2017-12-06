@@ -16,8 +16,8 @@
 #include "scene.hpp"
 
 
-unsigned int N = 100;
-unsigned int M = 100;
+unsigned int N = 1000;
+unsigned int M = 1000;
 
 
 int main()
@@ -33,30 +33,39 @@ int main()
 
     // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
+    Shader lineShader("shaders/lines.vs", "shaders/lines.fs", "shaders/passthru-lines.gs");
     Plane plane = Plane(N, M);
 
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 1000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
     float pulseHeight = 0.0f;
-    float scale = 100.0f;
+    float scale = 10000.0f;
 
     std::vector<MidiNoteEvent> *kickQueue = &oscServer.midiNoteQueue[2];
     std::vector<MetronomeEvent> *metronomeQueue = &oscServer.metronomeQueue;
+    std::vector<EnvelopeEvent> *envelopeQueue = &oscServer.envelopeQueue[1];
 
     while(!glfwWindowShouldClose(window))
     {
-        if (!metronomeQueue->empty()) {
-            MetronomeEvent event = metronomeQueue->back();
-            metronomeQueue->pop_back();
-            pulseHeight = 1.0f;
-        }
+        // if (!metronomeQueue->empty()) {
+        //     MetronomeEvent event = metronomeQueue->back();
+        //     metronomeQueue->pop_back();
+        //     pulseHeight = 1.0f;
+        // }
 
-        if (!kickQueue->empty()) {
-            MidiNoteEvent event = kickQueue->back();
-            kickQueue->pop_back();
-            std::cout << "note: " << event.note << " velocity: " << event.velocity << std::endl;
-            if (event.velocity > 0) {
-                pulseHeight = (float)event.velocity / 127.0f;
-            }
+        // if (!kickQueue->empty()) {
+        //     MidiNoteEvent event = kickQueue->back();
+        //     kickQueue->pop_back();
+        //     std::cout << "note: " << event.note << " velocity: " << event.velocity << std::endl;
+        //     if (event.velocity > 0) {
+        //         pulseHeight = (float)event.velocity / 127.0f;
+        //     }
+        // }
+
+        if (!envelopeQueue->empty()) {
+            EnvelopeEvent event = envelopeQueue->back();
+            envelopeQueue->pop_back();
+            std::cout << "value: " << event.value << std::endl;
+            pulseHeight = event.value;
         }
 
         pulseHeight *= 0.95f;//60.0f * deltaTime;
@@ -67,7 +76,9 @@ int main()
         glm::mat4 model;
         model = glm::translate(model, plane.Position);
         // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        model = glm::scale(model, glm::vec3(scale, 50.0, scale));
+
+        scenePredraw();
 
         geometryShader.use();
 
@@ -79,8 +90,19 @@ int main()
         geometryShader.setMat4("view", view);
         geometryShader.setMat4("model", model);
 
-        scenePredraw();
-        plane.draw();
+        // plane.draw();
+
+        lineShader.use();
+
+        lineShader.setFloat("t", t);
+        lineShader.setFloat("pulseHeight", pulseHeight);
+        lineShader.setMat4("projection", projection);
+        lineShader.setMat4("view", view);
+        lineShader.setMat4("model", model);
+
+        plane.drawLines();
+        // plane.drawPoints();
+
         scenePostdraw();
     }
 
