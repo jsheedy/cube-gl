@@ -16,9 +16,8 @@
 #include "scene.hpp"
 
 
-unsigned int N = 1000;
-unsigned int M = 1000;
-
+unsigned int N = 800;
+unsigned int M = 800;
 
 int main()
 {
@@ -38,7 +37,7 @@ int main()
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
     float pulseHeight = 0.0f;
-    float scale = 10000.0f;
+    float scale = 1000.0f;
 
     std::vector<MidiNoteEvent> *kickQueue = &oscServer.midiNoteQueue[2];
     std::vector<MetronomeEvent> *metronomeQueue = &oscServer.metronomeQueue;
@@ -46,11 +45,11 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
-        // if (!metronomeQueue->empty()) {
-        //     MetronomeEvent event = metronomeQueue->back();
-        //     metronomeQueue->pop_back();
-        //     pulseHeight = 1.0f;
-        // }
+        if (!metronomeQueue->empty()) {
+            MetronomeEvent event = metronomeQueue->back();
+            metronomeQueue->pop_back();
+            pulseHeight = 1.0f;
+        }
 
         // if (!kickQueue->empty()) {
         //     MidiNoteEvent event = kickQueue->back();
@@ -90,7 +89,8 @@ int main()
         geometryShader.setMat4("view", view);
         geometryShader.setMat4("model", model);
 
-        // plane.draw();
+        // if ((int)t % 2 == 0)
+            // plane.draw();
 
         lineShader.use();
 
@@ -100,7 +100,9 @@ int main()
         lineShader.setMat4("view", view);
         lineShader.setMat4("model", model);
 
-        plane.drawLines();
+        // if ((int)t % 2 == 0)
+            plane.drawLines();
+
         // plane.drawPoints();
 
         scenePostdraw();

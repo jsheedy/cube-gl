@@ -10,7 +10,7 @@ uniform mat4 projection;
 
 void main()
 {
-    float f = 200.0;
-    float y = 2.0 * pulseHeight * abs(sin(f* aPos.x + t) * sin(f * aPos.z + t));
+    float f = 100.0;
+    float y = 1.0 * pulseHeight * abs(sin(f* aPos.x + t) * sin(f * aPos.z + t));
     gl_Position = projection * view * model * vec4(aPos.x, y, aPos.z, 1.0);
 }
