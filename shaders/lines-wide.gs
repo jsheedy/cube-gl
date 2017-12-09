@@ -15,7 +15,7 @@ void main() {
 
     vec3 norm = normalize(cross(diff, up));
     vec3 norm2 = normalize(cross(norm, diff));
-    float width = 0.004 * (sin(2.0*t)/2 + 0.521);
+    float width = 0.0001 + 0.0005 * (sin(2.0*t)/2 + 0.5);
 
     gl_Position = MVP * (gl_in[0].gl_Position + width * vec4(norm, 1));
     EmitVertex();

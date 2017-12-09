@@ -19,14 +19,13 @@ class Plane: Geometry {
 
         unsigned int VBO;
         unsigned int EBO;
+        unsigned int VAO;
         unsigned int GridEBO;
 
         glm::vec3 Position = glm::vec3(0.0f, 0.0f,  0.0f);
 
 
     Plane(int N, int M) {
-
-        unsigned int VAO;
 
         sizePoints = N*M*3;
         sizeIndices = sizePoints * 2;// - M - N;
@@ -98,6 +97,7 @@ class Plane: Geometry {
     }
 
     void draw() {
+        glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
         glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
     }
@@ -108,6 +108,7 @@ class Plane: Geometry {
     }
 
     void drawLines() {
+        glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->GridEBO);
         glDrawElements(GL_LINES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
     }

@@ -12,6 +12,7 @@
 // local stuff
 #include "shader.h"
 #include "osc.hpp"
+#include "model.hpp"
 #include "objects.hpp"
 #include "scene.hpp"
 
@@ -33,6 +34,7 @@ int main()
     // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/geometry.vs", "shaders/geometry.fs", "shaders/geometry.gs");
     Shader lineShader("shaders/lines.vs", "shaders/lines-blue.fs", "shaders/lines-wide.gs");
+    Shader modelShader("shaders/models.vs", "shaders/models.fs", NULL);
     // Shader lineShader("shaders/lines.vs", "shaders/lines.fs", "shaders/passthru-lines.gs");
     Plane plane = Plane(N, M);
 
@@ -43,6 +45,9 @@ int main()
     std::vector<MidiNoteEvent> *kickQueue = &oscServer.midiNoteQueue[2];
     std::vector<MetronomeEvent> *metronomeQueue = &oscServer.metronomeQueue;
     std::vector<EnvelopeEvent> *envelopeQueue = &oscServer.envelopeQueue[1];
+
+    char *fname = (char *)"assets/nanosuit/nanosuit.obj";
+    Model nanoModel(fname);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -90,19 +95,30 @@ int main()
         geometryShader.setMat4("view", view);
         geometryShader.setMat4("model", model);
 
-        // if ((int)t % 2 == 0)
-            // plane.draw();
+        plane.draw();
 
         lineShader.use();
-
         lineShader.setFloat("t", t);
         lineShader.setFloat("pulseHeight", pulseHeight);
         lineShader.setMat4("MVP", projection * view * model);
 
         // if ((int)t % 2 == 0)
-            plane.drawLines();
+        // plane.drawLines();
 
         // plane.drawPoints();
+
+        // nanosuit model
+        model = glm::mat4();
+        scale = 1.0f;
+        // model = glm::translate(model, plane.Position);
+        // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        modelShader.use();
+        modelShader.setMat4("projection", projection);
+        modelShader.setMat4("view", view);
+        modelShader.setMat4("model", model);
+
+        nanoModel.Draw(modelShader);
 
         scenePostdraw();
     }
