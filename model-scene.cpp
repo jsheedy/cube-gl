@@ -25,8 +25,8 @@ int main()
 {
     GLFWwindow* window = sceneInit(width, height);
 
-    camera.Position = glm::vec3(0.0f, 3.0f, 6.0f);
-    camera.MovementSpeed = 10.0f;
+    camera.Position = glm::vec3(0.0f, 100.0f, 1000.0f);
+    camera.MovementSpeed = 20.0f;
     camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
 
     OSCServer oscServer(37341);
@@ -56,15 +56,21 @@ int main()
     Model bunnyModel((char *)"assets/bunny.ply");
 
     // glm::vec2 offsets[600];
-    // unsigned int idx = 0;
+    cityShader.use();
+    unsigned int idx = 0;
+    float w = 200.0;
+    for (float x=-10; x<10; x+=1) {
+        for (float z=-10; z<10; z+=1) {
+            // offsets[idx++] = glm::vec2(x, z);
+            std::stringstream ss;
+            string index;
+            ss << ++idx;
+            index = ss.str();
+            string label = ("offsets[" + index + "]").c_str();
+            cityShader.setVec2(label, x*w, z*w);
+        }
+    }
 
-    // for (float x=-1000; x<1000; x+=100) {
-    //     for (float z=-1000; z<1000; z+=100) {
-    //         offsets[idx++] = glm::vec2(x, z);
-    //     }
-    // }
-
-    // cityShader.use();
     // for(unsigned int i = 0; i < 400; i++)
     // {
     //     std::stringstream ss;
@@ -213,8 +219,8 @@ int main()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-        // glDrawElementsInstanced(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0, 1);
+        // glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+        glDrawElementsInstanced(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0, 400);
 
         scenePostdraw();
     }
