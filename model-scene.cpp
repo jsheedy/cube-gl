@@ -50,6 +50,7 @@ int main()
 
     Model nanoModel((char *)"assets/nanosuit/nanosuit.obj");
     Model velotronModel((char *)"assets/velotron_arise_eecc.fbx");
+    Model cityModel((char *)"assets/SciFi_HumanCity_Kit05-OBJ.obj");
     Model bunnyModel((char *)"assets/bunny.ply");
 
     while(!glfwWindowShouldClose(window))
@@ -175,6 +176,18 @@ int main()
         bunnyLineShader.setMat4("model", model);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+        // draw city w/ same shader
+        Mesh cityMesh = cityModel.meshes[0];
+        glBindVertexArray(cityMesh.VAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
+
+        bunnyShader.use();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+        bunnyLineShader.use();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
         scenePostdraw();
     }
