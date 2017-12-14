@@ -1,6 +1,7 @@
 // std stuff
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 // GL stuff
 #include "glad/glad.h"
@@ -33,6 +34,7 @@ int main()
 
     // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
+    Shader cityShader("shaders/vertex/instanced.vs", "shaders/fragment/bunny.fs", "shaders/geometry/geometry.gs");
     Shader bunnyShader("shaders/vertex/passthru.vs", "shaders/fragment/bunny.fs", "shaders/geometry/geometry.gs");
     Shader bunnyLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines-blue.fs", NULL);
     Shader lineShader("shaders/vertex/lines.vs", "shaders/fragment/lines-blue.fs", "shaders/geometry/lines-wide.gs");
@@ -52,6 +54,25 @@ int main()
     Model velotronModel((char *)"assets/velotron_arise_eecc.fbx");
     Model cityModel((char *)"assets/SciFi_HumanCity_Kit05-OBJ.obj");
     Model bunnyModel((char *)"assets/bunny.ply");
+
+    // glm::vec2 offsets[600];
+    // unsigned int idx = 0;
+
+    // for (float x=-1000; x<1000; x+=100) {
+    //     for (float z=-1000; z<1000; z+=100) {
+    //         offsets[idx++] = glm::vec2(x, z);
+    //     }
+    // }
+
+    // cityShader.use();
+    // for(unsigned int i = 0; i < 400; i++)
+    // {
+    //     std::stringstream ss;
+    //     string index;
+    //     ss << i;
+    //     index = ss.str();
+    //     cityShader.setVec2(("offsets[" + index + "]").c_str(), offsets[i].x, offsets[i].y);
+    // }
 
     while(!glfwWindowShouldClose(window))
     {
@@ -85,7 +106,7 @@ int main()
         glm::mat4 model;
         model = glm::translate(model, plane.Position);
         // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(scale, 50.0, scale));
+        // model = glm::scale(model, glm::vec3(scale, 50.0, scale));
 
         scenePredraw();
 
@@ -99,7 +120,7 @@ int main()
         geometryShader.setMat4("view", view);
         geometryShader.setMat4("model", model);
 
-        // plane.draw();
+        plane.draw();
 
         // if ((int)t % 2 == 0)
         // plane.drawLines();
@@ -151,8 +172,8 @@ int main()
 
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(0.0,0.0, 0.0));
-        model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(10.0, 10.0, 10.0));
+        // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+        // model = glm::scale(model, glm::vec3(10.0, 10.0, 10.0));
 
         Mesh mesh = bunnyModel.meshes[0];
         glBindVertexArray(mesh.VAO);
@@ -177,29 +198,23 @@ int main()
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
-        // draw city w/ same shader
+        // draw city w/ instanced shader
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(0.0, 0.0, 0.0));
+
+        cityShader.use();
+        cityShader.setFloat("t", t);
+        cityShader.setMat4("projection", projection);
+        cityShader.setMat4("view", view);
+        cityShader.setMat4("model", model);
+
         Mesh cityMesh = cityModel.meshes[0];
         glBindVertexArray(cityMesh.VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
 
-        for (float x=-500; x<=500; x+=100) {
-            for (float z=-500; z<=500; z+=100) {
-                model = glm::mat4();
-                model = glm::translate(model, glm::vec3(x, 0.0, z));
-                // model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-                // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-                // model = glm::scale(model, glm::vec3(10.0, 10.0, 10.0));
-
-                bunnyShader.use();
-                bunnyShader.setMat4("model", model);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-                glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-                bunnyLineShader.use();
-                bunnyLineShader.setMat4("model", model);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-            }
-        }
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+        // glDrawElementsInstanced(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0, 1);
 
         scenePostdraw();
     }

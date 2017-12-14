@@ -106,6 +106,12 @@ public:
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
 
+    void setVec2(const std::string &name, float x, float y) const
+    {
+        glm::vec2 vec(x,y);
+        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, glm::value_ptr(vec));
+    }
+
     void setVec3(const std::string &name, float x, float y, float z) const
     {
         glm::vec3 vec(x,y,z);
