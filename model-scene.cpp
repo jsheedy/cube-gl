@@ -182,21 +182,23 @@ int main()
         glBindVertexArray(cityMesh.VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
 
-        for (float x=-1000; x<=1000; x+=100) {
-            model = glm::mat4();
-            model = glm::translate(model, glm::vec3(x, 0.0, 0.0));
-            // model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-            // model = glm::scale(model, glm::vec3(10.0, 10.0, 10.0));
+        for (float x=-500; x<=500; x+=100) {
+            for (float z=-500; z<=500; z+=100) {
+                model = glm::mat4();
+                model = glm::translate(model, glm::vec3(x, 0.0, z));
+                // model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+                // model = glm::scale(model, glm::vec3(10.0, 10.0, 10.0));
 
-            bunnyShader.use();
-            bunnyShader.setMat4("model", model);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-            bunnyLineShader.use();
-            bunnyLineShader.setMat4("model", model);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+                bunnyShader.use();
+                bunnyShader.setMat4("model", model);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+                bunnyLineShader.use();
+                bunnyLineShader.setMat4("model", model);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+            }
         }
 
         scenePostdraw();
