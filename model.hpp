@@ -74,10 +74,10 @@ struct Texture {
 };
 
 
-
-
 class Mesh {
     public:
+            /*  Render data  */
+        unsigned int VAO, VBO, EBO;
         /*  Mesh Data  */
         vector<Vertex> vertices;
         vector<unsigned int> indices;
@@ -120,8 +120,6 @@ class Mesh {
             glBindVertexArray(0);
         }
     private:
-        /*  Render data  */
-        unsigned int VAO, VBO, EBO;
         /*  Functions    */
         void setupMesh()
         {
@@ -159,6 +157,8 @@ class Mesh {
 class Model
 {
     public:
+        /*  Model Data  */
+        vector<Mesh> meshes;
         /*  Functions   */
         Model(char *path)
         {
@@ -170,8 +170,7 @@ class Model
                 meshes[i].Draw(shader);
         }
     private:
-        /*  Model Data  */
-        vector<Mesh> meshes;
+
         string directory;
 
         void loadModel(string path)
@@ -220,11 +219,13 @@ class Model
                 vector.z = mesh->mVertices[i].z;
                 vertex.Position = vector;
 
-                vector = glm::vec3();
-                vector.x = mesh->mNormals[i].x;
-                vector.y = mesh->mNormals[i].y;
-                vector.z = mesh->mNormals[i].z;
-                vertex.Normal = vector;
+                if (mesh->HasNormals()) {
+                    glm::vec3 vector;
+                    vector.x = mesh->mNormals[i].x;
+                    vector.y = mesh->mNormals[i].y;
+                    vector.z = mesh->mNormals[i].z;
+                    vertex.Normal = vector;
+                }
 
                 if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
                 {
