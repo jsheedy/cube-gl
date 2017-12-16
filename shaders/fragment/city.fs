@@ -3,6 +3,9 @@ out vec4 FragColor;
 
 in vec3 normal;
 in vec3 fragPos;
+flat in int instanceID;
+
+uniform int selected;
 
 uniform float t;
 
@@ -19,5 +22,9 @@ void main()
     //     0.5,
     //     0
     // );
-    FragColor = vec4(diff, diff, diff,0);
+    if ((instanceID % 128) == selected) {
+        FragColor = vec4(1, 0, 0, 0);
+    } else {
+        FragColor = vec4(diff, diff, diff,0);
+    }
 }

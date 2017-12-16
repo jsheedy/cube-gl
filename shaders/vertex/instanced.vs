@@ -7,12 +7,26 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform float t;
+uniform float cameraX;
+uniform float cameraZ;
+uniform float pulseHeight;
 
-uniform vec2 offsets[400];
+uniform vec2 offsets[900];
+
+out vec3 normal;
+flat out int instanceID;
 
 void main()
 {
     vec2 offset = offsets[gl_InstanceID];
-    gl_Position = vec4(aPos.x + offset.x, aPos.y, aPos.z + offset.y, 1.0);
-    // gl_Position = vec4(aPos.x + offset.x + 20.0 * gl_InstanceID, aPos.y, aPos.z + offset.y, 1.0);
+    float y = aPos.y;
+    if (aPos.y < 10.0) {
+       y = aPos.y * pulseHeight;
+    }
+    gl_Position = projection * view * model * vec4(aPos.x + offset.x, y, aPos.z + offset.y, 1.0);
+
+
+    // normal = normalize(model * aNormal);
+    normal = mat3(transpose(inverse(model))) * aNormal;
+    instanceID = gl_InstanceID;
 }
