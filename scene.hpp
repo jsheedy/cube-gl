@@ -26,6 +26,8 @@ Camera camera = Camera(
     -20.0f
 );
 
+bool mDown = false;
+
 void processInput(GLFWwindow *window, float deltaTime)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -34,8 +36,13 @@ void processInput(GLFWwindow *window, float deltaTime)
     if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         clearScreen = !clearScreen;
 
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mDown) {
         mouseLookOn = !mouseLookOn;
+        mDown = true;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
+        mDown = false;;
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
         camera.MovementSpeed *= 1.2;

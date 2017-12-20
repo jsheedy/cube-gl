@@ -146,7 +146,7 @@ int main()
                 UpVector
             );
 
-            glm::quat rot = glm::angleAxis(deltaTime * glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::quat rot = glm::angleAxis(deltaTime * glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
             camera.Orientation = rot * camera.Orientation;
             view = glm::mat4();
             view = glm::translate(view, glm::vec3(0.0f, -100 + -t*10, 0.0f)) * glm::toMat4(camera.Orientation);
