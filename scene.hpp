@@ -7,6 +7,7 @@ int width = 1400;
 int height = 900;
 
 float t = 0;
+float timeMultiplier = 1.0;
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
@@ -57,7 +58,7 @@ void processInput(GLFWwindow *window, float deltaTime)
 }
 
 void scenePredraw() {
-    t = glfwGetTime();
+    t = glfwGetTime() * timeMultiplier;
     deltaTime = t - lastFrame;
     lastFrame = t;
     if (clearScreen) {
@@ -130,6 +131,7 @@ GLFWwindow* sceneInit(int width, int height)
         return window;
     }
 
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glEnable(GL_DEPTH_TEST);
 

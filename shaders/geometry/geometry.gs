@@ -22,13 +22,15 @@ void main() {
 
     normal = normalize(cross(a,b));
 
-    gl_Position = projection * view * v1;
+    mat4 PV = projection * view;
+
+    gl_Position = PV * v1;
     EmitVertex();
 
-    gl_Position = projection * view * v2;
+    gl_Position = PV * v2;
     EmitVertex();
 
-    gl_Position = projection * view * v3;
+    gl_Position = PV * v3;
     EmitVertex();
 
     EndPrimitive();

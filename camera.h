@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 #include <vector>
 
@@ -35,6 +37,10 @@ public:
     glm::vec3 Up;
     glm::vec3 Right;
     glm::vec3 WorldUp;
+
+    glm::mat4 view;
+    glm::quat Orientation;
+
     // Euler Angles
     float Yaw;
     float Pitch;
@@ -42,6 +48,7 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
+    bool FreeLook;
 
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
@@ -50,6 +57,8 @@ public:
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
+        FreeLook = true;
+        Orientation = glm::quat();
         updateCameraVectors();
     }
     // Constructor with scalar values
@@ -59,6 +68,7 @@ public:
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
+        FreeLook = true;
         updateCameraVectors();
     }
 
