@@ -1,4 +1,5 @@
-CPP_FLAGS=-std=c++11 -g
+CPP_FLAGS=-std=c++11
+# CPP_FLAGS=-std=c++11 -g
 
 all: model-scene
 

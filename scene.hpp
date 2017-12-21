@@ -15,7 +15,6 @@ float lastX;
 float lastY;
 
 bool clearScreen = true;
-bool mouseLookOn = false;
 
 GLFWwindow* window;
 
@@ -28,21 +27,25 @@ Camera camera = Camera(
 
 bool mDown = false;
 
-void processInput(GLFWwindow *window, float deltaTime)
+void processInput(GLFWwindow *window, Camera camera, float deltaTime)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && !mDown) {
         clearScreen = !clearScreen;
+        mDown = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
+        mDown = false;
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mDown) {
-        mouseLookOn = !mouseLookOn;
+        camera.Action = FREELOOK;
         mDown = true;
     }
 
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
-        mDown = false;;
+        mDown = false;
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
         camera.MovementSpeed *= 1.2;
@@ -64,7 +67,7 @@ void processInput(GLFWwindow *window, float deltaTime)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-void scenePredraw() {
+void scenePredraw(Camera camera) {
     t = glfwGetTime() * timeMultiplier;
     deltaTime = t - lastFrame;
     lastFrame = t;
@@ -73,7 +76,7 @@ void scenePredraw() {
         glClearColor(r, g, b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    processInput(window, deltaTime);
+    processInput(window, camera, deltaTime);
 }
 
 void scenePostdraw() {
@@ -93,7 +96,7 @@ void framebuffer_size_callback(GLFWwindow* window, int _width, int _height)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (!mouseLookOn) {
+    if (camera.Action != FREELOOK) {
         return;
     }
     if (std::isnan(lastX) || std::isnan(lastY))

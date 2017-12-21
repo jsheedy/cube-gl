@@ -19,6 +19,13 @@ enum Camera_Movement {
     DOWN
 };
 
+enum CameraActions {
+    CENTER_ROT,
+    CENTER_HOVER,
+    HOVER_BUNNY,
+    FREELOOK,
+};
+
 // Default camera values
 const float YAW        = -90.0f;
 const float PITCH      =  0.0f;
@@ -41,6 +48,8 @@ public:
     glm::mat4 view;
     glm::quat Orientation;
 
+    CameraActions Action;
+
     // Euler Angles
     float Yaw;
     float Pitch;
@@ -48,7 +57,6 @@ public:
     float MovementSpeed;
     float MouseSensitivity;
     float Zoom;
-    bool FreeLook;
 
     // Constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH) : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED), MouseSensitivity(SENSITIVTY), Zoom(ZOOM)
@@ -57,8 +65,8 @@ public:
         WorldUp = up;
         Yaw = yaw;
         Pitch = pitch;
-        FreeLook = true;
         Orientation = glm::quat();
+        Action = FREELOOK;
         updateCameraVectors();
     }
     // Constructor with scalar values
@@ -68,7 +76,8 @@ public:
         WorldUp = glm::vec3(upX, upY, upZ);
         Yaw = yaw;
         Pitch = pitch;
-        FreeLook = true;
+        Orientation = glm::quat();
+        Action = FREELOOK;
         updateCameraVectors();
     }
 

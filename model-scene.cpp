@@ -23,6 +23,8 @@
 unsigned int N = 100;
 unsigned int M = 100;
 
+float ROT_SLERP_MIX = 0.1f;
+
 float angleBetween(glm::vec3 a, glm::vec3 b, glm::vec3 origin) {
     glm::vec3 da=glm::normalize(a-origin);
     glm::vec3 db=glm::normalize(b-origin);
@@ -46,7 +48,6 @@ int main()
     Shader cityShader("shaders/vertex/instanced.vs", "shaders/fragment/city.fs", NULL);
     Shader bunnyLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines-blue.fs", NULL);
     Shader lineShader("shaders/vertex/lines.vs", "shaders/fragment/lines-blue.fs", "shaders/geometry/lines-wide.gs");
-    // Shader lineShader("shaders/lines.vs", "shaders/lines.fs", "shaders/passthru-lines.gs");
     Plane plane = Plane(N, M);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
@@ -62,27 +63,13 @@ int main()
     Model bunnyModel((char *)"assets/bunny.ply");
     Model sphereModel((char *)"assets/sphere.ply");
 
-    // cityShader.use();
-    // unsigned int idx = 0;
-    // float w = 200.0;
-    // for (float x=-15; x<15; x+=1) {
-    //     for (float z=-15; z<15; z+=1) {
-    //         std::stringstream ss;
-    //         string index;
-    //         ss << ++idx;
-    //         index = ss.str();
-    //         string label = ("offsets[" + index + "]").c_str();
-    //         cityShader.setVec2(label, x*w, z*w);
-    //     }
-    // }
-
     glm::vec3 LookTarget;
 
     bool keyDown = false;
 
     while(!glfwWindowShouldClose(window))
     {
-        scenePredraw();
+        scenePredraw(camera);
 
         while (!metronomeQueue->empty()) {
             MetronomeEvent event = metronomeQueue->back();
@@ -93,7 +80,6 @@ int main()
         while (!midiNoteQueue->empty()) {
             MidiNoteEvent event = midiNoteQueue->back();
             midiNoteQueue->pop_back();
-            std::cout << "note: " << event.note << " velocity: " << event.velocity << std::endl;
             if (event.note == 36 && event.velocity > 0) {
                 pulseHeight = (float)event.velocity / 127.0f;
             }
@@ -118,58 +104,81 @@ int main()
         // handle additional keys with some janky debouncing
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && ! keyDown) {
             keyDown = true;
-            camera.FreeLook = ! camera.FreeLook;
-            LookTarget = glm::vec3(10.0f, 0.0f, 0.0f);
+            camera.Action = CENTER_ROT;
         }
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE) {
             keyDown = false;
         }
 
-        if (!camera.FreeLook) {
-            //LookTarget != NULL && LookTarget)
-            // glm::quat quatStart (glm::lookAt (eye_start, center_start, up_start));
-            // glm::quat quatStart = view;
+        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && ! keyDown) {
+            keyDown = true;
+            camera.Action = CENTER_HOVER;
+        }
+        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE) {
+            keyDown = false;
+        }
 
-            // glm::vec3 upEnd(0.0f, 1.0f, 0.0f);
-            // glm::vec3 centerEnd = camera.Position;
-            // glm::vec3 eyeEnd = glm::normalize(LookTarget - camera.Position);
-            // glm::quat quatEnd (glm::lookAt(eyeEnd, centerEnd, upEnd));
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && ! keyDown) {
+            keyDown = true;
+            camera.Action = HOVER_BUNNY;
+        }
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE) {
+            keyDown = false;
+        }
 
-            float w = 1.0f/10;
-            glm::vec3 Position(1000 * glm::cos(w*t), 1000.0f, 1000 * glm::sin(w*t));
+        if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS && ! keyDown) {
+            keyDown = true;
+            camera.Action = FREELOOK;
+        }
+        if (glfwGetKey(window, GLFW_KEY_0) == GLFW_RELEASE) {
+            keyDown = false;
+        }
+
+        if (camera.Action == CENTER_ROT) {
+
+            glm::vec3 TargetPosition(0.0f, 1000.0f, 0.0f);
             glm::vec3 LookTarget(0.0, 0.0, 0.0);
             glm::vec3 UpVector(0.0, 1.0, 0.0);
 
-            view = glm::lookAt(
-                Position,
-                LookTarget,
-                UpVector
-            );
+            glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), glm::vec3(0.0f, 1.0f, 0.0f));
+            glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            // camera.Orientation = glm::slerp(camera.Orientation, TargetOrientation, 0.1);
+            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
 
-            glm::quat rot = glm::angleAxis(deltaTime * glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            camera.Orientation = rot * camera.Orientation;
+            glm::quat rot = rotDown * rotAround * glm::quat();
+            camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
             view = glm::mat4();
-            view = glm::translate(view, glm::vec3(0.0f, -100 + -t*10, 0.0f)) * glm::toMat4(camera.Orientation);
-
-            // view = glm::toMat4(glm::mix(glm::toQuat(camera.view), toQuat(view), 0.5));
-            // view = SlerpRot(view, quatEnd, camera.Position, camera.Position, 0.5f);
-            // SlerpRot(quatStart, quatEnd, 0.5f);
-            /*
-            glm::mat4 SlerpRot(glm::quat quatStart, glm::quat quatEnd, glm::vec3 eyeStart, glm::vec3 eyeEnd, float amount) {
-            // hat tip: https://stackoverflow.com/questions/27185055/how-to-implement-a-smooth-transition-between-two-different-camera-view-in-opengl
-
-            // First interpolate the rotation
-            glm::quat quatInterp = glm::slerp (quatStart, quatEnd, amount);
-
-            // Then interpolate the translation
-            // glm::vec3 posInterp  = glm::mix   (eyeStart,  eyeEnd,  amount);
-            // glm::mat4 view_matrix = glm::mat4_cast (quatInterp); // Setup rotation
-            // view_matrix[3]        = glm::vec4 (posInterp, 1.0);  // Introduce translation
-            // return view_matrix;
-            return glm::mat4_cast(quatInterp);
+            view = glm::toMat4(camera.Orientation) * view;
+            view = glm::translate(view, -camera.Position);
         }
-            */
-        } else {
+        else if (camera.Action == CENTER_HOVER) {
+            glm::vec3 TargetPosition(0.0f, 2000.0f, 0.0f);
+            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
+
+            glm::vec3 UpVector(0.0, 1.0, 0.0);
+
+            glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+            view = glm::mat4();
+            view = glm::toMat4(camera.Orientation) * view;
+            view = glm::translate(view, -camera.Position);
+
+
+        }
+        else if (camera.Action == HOVER_BUNNY) {
+            glm::vec3 TargetPosition(10.0f * sin(t), 10.0f, 10.0f * cos(t));
+            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
+
+            glm::vec3 UpVector(0.0, 1.0, 0.0);
+
+            glm::quat rot = glm::angleAxis(0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+            camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+            view = glm::mat4();
+            view = glm::toMat4(camera.Orientation) * view;
+            view = glm::translate(view, -camera.Position);
+            // return glm::mat4_cast(quatInterp);
+        }
+        else if (camera.Action == FREELOOK) {
             view = camera.GetViewMatrix();
         }
 
@@ -194,13 +203,12 @@ int main()
         lineShader.use();
         lineShader.setFloat("t", t);
         lineShader.setFloat("pulseHeight", pulseHeight);
-        // lineShader.setMat4("MVP", projection * view * model);
         lineShader.setMat4("projection", projection);
         lineShader.setMat4("view", view);
         lineShader.setMat4("model", model);
 
         lineShader.use();
-        // bunnyModel.Draw(lineShader);
+        bunnyModel.Draw(lineShader);
 
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(0.0,0.0, 0.0));
@@ -236,12 +244,12 @@ int main()
         // glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
         // // lines only
-        // bunnyLineShader.use();
-        // bunnyLineShader.setMat4("projection", projection);
-        // bunnyLineShader.setMat4("view", view);
-        // bunnyLineShader.setMat4("model", model);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        // glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+        bunnyLineShader.use();
+        bunnyLineShader.setMat4("projection", projection);
+        bunnyLineShader.setMat4("view", view);
+        bunnyLineShader.setMat4("model", model);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
         // draw city w/ instanced shader
         model = glm::mat4();
