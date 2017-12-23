@@ -25,10 +25,50 @@ unsigned int M = 100;
 
 float ROT_SLERP_MIX = 0.1f;
 
+glm::vec3 UpVector(0.0f, 1.0f, 0.0f);
+
+
 float angleBetween(glm::vec3 a, glm::vec3 b, glm::vec3 origin) {
     glm::vec3 da=glm::normalize(a-origin);
     glm::vec3 db=glm::normalize(b-origin);
     return glm::acos(glm::dot(da, db));
+}
+
+glm::quat FromToRotation(glm::vec3 start, glm::vec3 dest){
+    /* thx
+    http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-17-quaternions/#how-do-i-find-the-rotation-between-2-vectors-
+    */
+	start = glm::normalize(start);
+	dest = glm::normalize(dest);
+
+	float cosTheta = glm::dot(start, dest);
+	glm::vec3 rotationAxis;
+
+	if (cosTheta < -1 + 0.001f){
+		// special case when vectors in opposite directions:
+		// there is no "ideal" rotation axis
+		// So guess one; any will do as long as it's perpendicular to start
+		rotationAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), start);
+        // FIXME:
+		// if (glm::gtx::norm::length2(rotationAxis) < 0.01 ) // bad luck, they were parallel, try again!
+		// 	rotationAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), start);
+
+		rotationAxis = glm::normalize(rotationAxis);
+		return glm::angleAxis(glm::radians(180.0f), rotationAxis);
+	}
+
+	rotationAxis = glm::cross(start, dest);
+
+	float s = glm::sqrt( (1+cosTheta)*2 );
+	float invs = 1 / s;
+
+	return glm::quat(
+		s * 0.5f,
+		rotationAxis.x * invs,
+		rotationAxis.y * invs,
+		rotationAxis.z * invs
+	);
+
 }
 
 int main()
@@ -83,7 +123,11 @@ int main()
             if (event.note == 36 && event.velocity > 0) {
                 pulseHeight = (float)event.velocity / 127.0f;
             }
-            cityShader.setInt("selected", event.note);
+            if (event.velocity == 0) {
+                cityShader.setInt("selected", 0);
+            } else {
+                cityShader.setInt("selected", event.note);
+            }
         }
 
         while (!envelopeQueue->empty()) {
@@ -137,50 +181,37 @@ int main()
         if (camera.Action == CENTER_ROT) {
 
             glm::vec3 TargetPosition(0.0f, 1000.0f, 0.0f);
-            glm::vec3 LookTarget(0.0, 0.0, 0.0);
-            glm::vec3 UpVector(0.0, 1.0, 0.0);
+            glm::vec3 RightVector(1.0f, 0.0f, 0.0f);
 
-            glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            // camera.Orientation = glm::slerp(camera.Orientation, TargetOrientation, 0.1);
-            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-
+            glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), UpVector);
+            glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), RightVector);
             glm::quat rot = rotDown * rotAround * glm::quat();
+            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
             camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
-            view = glm::mat4();
-            view = glm::toMat4(camera.Orientation) * view;
-            view = glm::translate(view, -camera.Position);
         }
         else if (camera.Action == CENTER_HOVER) {
             glm::vec3 TargetPosition(0.0f, 2000.0f, 0.0f);
-            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-
-            glm::vec3 UpVector(0.0, 1.0, 0.0);
-
             glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
             camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
-            view = glm::mat4();
-            view = glm::toMat4(camera.Orientation) * view;
-            view = glm::translate(view, -camera.Position);
-
-
         }
         else if (camera.Action == HOVER_BUNNY) {
             glm::vec3 TargetPosition(10.0f * sin(t), 10.0f, 10.0f * cos(t));
+            glm::quat rot = glm::angleAxis(0.0f, UpVector);
             camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-
-            glm::vec3 UpVector(0.0, 1.0, 0.0);
-
-            glm::quat rot = glm::angleAxis(0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
             camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
-            view = glm::mat4();
-            view = glm::toMat4(camera.Orientation) * view;
-            view = glm::translate(view, -camera.Position);
-            // return glm::mat4_cast(quatInterp);
         }
         else if (camera.Action == FREELOOK) {
-            view = camera.GetViewMatrix();
+            //  ¯\_(ツ)_/¯
+            // slerp rotation to up so we're not rotated
+            // glm::vec3 up = glm::inverse(camera.Orientation) * glm::vec3(0.0, 1.0, 0.0);
+            // glm::quat q = FromToRotation(up, glm::vec3(0.0, 1.0, 0.0));
+            // glm::quat rot = glm::mix(camera.Orientation, q, ROT_SLERP_MIX);
+            // camera.Orientation = rot * camera.Orientation;
         }
+
+        view = glm::toMat4(camera.Orientation);
+        view = glm::translate(view, -camera.Position);
 
         geometryShader.use();
 

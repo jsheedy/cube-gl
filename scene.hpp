@@ -27,7 +27,7 @@ Camera camera = Camera(
 
 bool mDown = false;
 
-void processInput(GLFWwindow *window, Camera camera, float deltaTime)
+void processInput(GLFWwindow *window, float deltaTime)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -76,7 +76,7 @@ void scenePredraw(Camera camera) {
         glClearColor(r, g, b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-    processInput(window, camera, deltaTime);
+    processInput(window, deltaTime);
 }
 
 void scenePostdraw() {
