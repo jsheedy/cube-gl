@@ -23,8 +23,8 @@ void main()
     //     0
     // );
     if ((instanceID % 128) == selected) {
-        FragColor = vec4(1, 0, 0, 0);
+        FragColor = vec4(1.0, 0, 0, 1.0f);
     } else {
-        FragColor = vec4(diff, diff, diff,0);
+        FragColor = vec4(diff, diff, diff, 1.0f);
     }
 }

@@ -20,10 +20,17 @@
 #include "scene.hpp"
 
 
+enum ShaderStyle {
+    LINES_ONLY,
+    FULL
+};
+
 unsigned int N = 100;
 unsigned int M = 100;
 
 float ROT_SLERP_MIX = 0.1f;
+
+ShaderStyle shaderStyle = FULL;
 
 glm::vec3 UpVector(0.0f, 1.0f, 0.0f);
 
@@ -34,40 +41,7 @@ float angleBetween(glm::vec3 a, glm::vec3 b, glm::vec3 origin) {
     return glm::acos(glm::dot(da, db));
 }
 
-glm::quat FromToRotation(glm::vec3 start, glm::vec3 dest){
-    /* thx
-    http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-17-quaternions/#how-do-i-find-the-rotation-between-2-vectors-
-    */
-	start = glm::normalize(start);
-	dest = glm::normalize(dest);
-
-	float cosTheta = glm::dot(start, dest);
-	glm::vec3 rotationAxis;
-
-	if (cosTheta < -1 + 0.001f){
-		// special case when vectors in opposite directions:
-		// there is no "ideal" rotation axis
-		// So guess one; any will do as long as it's perpendicular to start
-		rotationAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), start);
-        // FIXME:
-		// if (glm::gtx::norm::length2(rotationAxis) < 0.01 ) // bad luck, they were parallel, try again!
-		// 	rotationAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), start);
-
-		rotationAxis = glm::normalize(rotationAxis);
-		return glm::angleAxis(glm::radians(180.0f), rotationAxis);
-	}
-
-	rotationAxis = glm::cross(start, dest);
-
-	float s = glm::sqrt( (1+cosTheta)*2 );
-	float invs = 1 / s;
-
-	return glm::quat(
-		s * 0.5f,
-		rotationAxis.x * invs,
-		rotationAxis.y * invs,
-		rotationAxis.z * invs
-	);
+void Draw(Model model, Shader shader) {
 
 }
 
@@ -86,6 +60,7 @@ int main()
     Shader geometryShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
     Shader bunnyShader("shaders/vertex/passthru.vs", "shaders/fragment/bunny.fs", "shaders/geometry/geometry.gs");
     Shader cityShader("shaders/vertex/instanced.vs", "shaders/fragment/city.fs", NULL);
+    Shader cityLineShader("shaders/vertex/instanced.vs", "shaders/fragment/lines-blue.fs", NULL);
     Shader bunnyLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines-blue.fs", NULL);
     Shader lineShader("shaders/vertex/lines.vs", "shaders/fragment/lines-blue.fs", "shaders/geometry/lines-wide.gs");
     Plane plane = Plane(N, M);
@@ -106,6 +81,9 @@ int main()
     glm::vec3 LookTarget;
 
     bool keyDown = false;
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     while(!glfwWindowShouldClose(window))
     {
@@ -170,6 +148,22 @@ int main()
             keyDown = false;
         }
 
+        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && ! keyDown) {
+            keyDown = true;
+            shaderStyle = LINES_ONLY;
+        }
+        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE) {
+            keyDown = false;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && ! keyDown) {
+            keyDown = true;
+            shaderStyle = FULL;
+        }
+        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE) {
+            keyDown = false;
+        }
+
         if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS && ! keyDown) {
             keyDown = true;
             camera.Action = FREELOOK;
@@ -196,18 +190,13 @@ int main()
             camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
         }
         else if (camera.Action == HOVER_BUNNY) {
-            glm::vec3 TargetPosition(10.0f * sin(t), 10.0f, 10.0f * cos(t));
-            glm::quat rot = glm::angleAxis(0.0f, UpVector);
+            glm::vec3 TargetPosition(10.0f * sin(t), 100.0f, 200.0f + 10.0f * cos(t));
+            glm::quat rot = glm::angleAxis(glm::radians(10.0f), glm::vec3(1.00f, 0.0f, 0.0f));
             camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
             camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
         }
         else if (camera.Action == FREELOOK) {
             //  ¯\_(ツ)_/¯
-            // slerp rotation to up so we're not rotated
-            // glm::vec3 up = glm::inverse(camera.Orientation) * glm::vec3(0.0, 1.0, 0.0);
-            // glm::quat q = FromToRotation(up, glm::vec3(0.0, 1.0, 0.0));
-            // glm::quat rot = glm::mix(camera.Orientation, q, ROT_SLERP_MIX);
-            // camera.Orientation = rot * camera.Orientation;
         }
 
         view = glm::toMat4(camera.Orientation);
@@ -246,64 +235,77 @@ int main()
         // model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
         // model = glm::scale(model, glm::vec3(10.0, 10.0, 10.0));
 
-        // // bunny
-        Mesh bunnyMesh = bunnyModel.meshes[0];
-        glBindVertexArray(bunnyMesh.VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bunnyMesh.EBO);
-
-        // "normal" mode bunny
-
-        bunnyShader.use();
-        bunnyShader.setFloat("t", t);
-        bunnyShader.setMat4("projection", projection);
-        bunnyShader.setMat4("view", view);
-        bunnyShader.setMat4("model", model);
-        bunnyModel.Draw(bunnyShader);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(0.0,0.0, 0.0));
-        model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(100.0f));
-        bunnyShader.setMat4("model", model);
         Mesh sphereMesh = sphereModel.meshes[0];
-        // glBindVertexArray(sphereMesh.VAO);
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereMesh.EBO);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        // glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+        glBindVertexArray(sphereMesh.VAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereMesh.EBO);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
-        // // lines only
-        bunnyLineShader.use();
-        bunnyLineShader.setMat4("projection", projection);
-        bunnyLineShader.setMat4("view", view);
-        bunnyLineShader.setMat4("model", model);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-
-        // draw city w/ instanced shader
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(0.0, 0.0, 0.0));
-
-        cityShader.use();
-        cityShader.setFloat("t", t);
-        cityShader.setFloat("cameraX", camera.Position.x);
-        cityShader.setFloat("cameraZ", camera.Position.z);
-        cityShader.setFloat("pulseHeight", pulseHeight);
-
-        // cityShader.setMat4("projection", projection);
-        // cityShader.setMat4("view", view);
-        // cityShader.setMat4("model", model);
-        cityShader.setMat4("MVP", projection * view * model);
-
         Mesh cityMesh = cityModel.meshes[0];
-        glBindVertexArray(cityMesh.VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        // glDrawElements(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-        glDrawElementsInstanced(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0, 900);
+        if (shaderStyle == FULL) {
+            cityShader.use();
+            cityShader.setFloat("t", t);
+            cityShader.setFloat("cameraX", camera.Position.x);
+            cityShader.setFloat("cameraZ", camera.Position.z);
+            cityShader.setFloat("pulseHeight", pulseHeight);
+            cityShader.setMat4("MVP", projection * view * model);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glBindVertexArray(cityMesh.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
+            glDrawElementsInstanced(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0, 900);
+
+            // // bunny
+            Mesh bunnyMesh = bunnyModel.meshes[0];
+            glBindVertexArray(bunnyMesh.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bunnyMesh.EBO);
+
+            // "normal" mode bunny
+            model = glm::mat4();
+            model = glm::translate(model, glm::vec3(0.0,-35.0, 0.0));
+            model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(1000.0f));
+            bunnyShader.use();
+            bunnyShader.setFloat("t", t);
+            bunnyShader.setFloat("alpha", (glm::sin(t)/2.0 + 0.5f));
+            bunnyShader.setMat4("projection", projection);
+            bunnyShader.setMat4("view", view);
+            bunnyShader.setMat4("model", model);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+        } else {
+            cityLineShader.use();
+            cityLineShader.setFloat("t", t);
+            cityLineShader.setFloat("cameraX", camera.Position.x);
+            cityLineShader.setFloat("cameraZ", camera.Position.z);
+            cityLineShader.setFloat("pulseHeight", pulseHeight);
+            cityLineShader.setMat4("MVP", projection * view * model);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glBindVertexArray(cityMesh.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cityMesh.EBO);
+            glDrawElementsInstanced(GL_TRIANGLES, cityMesh.indices.size(), GL_UNSIGNED_INT, (void*)0, 900);
+
+            // bunny
+            Mesh bunnyMesh = bunnyModel.meshes[0];
+            glBindVertexArray(bunnyMesh.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bunnyMesh.EBO);
+
+            // "normal" mode bunny
+            model = glm::mat4();
+            model = glm::translate(model, glm::vec3(0.0,-35.0, 0.0));
+            model = glm::rotate(model, glm::radians(rotationAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(1000.0f));
+            bunnyLineShader.use();
+            bunnyLineShader.setFloat("t", t);
+            bunnyLineShader.setMat4("projection", projection);
+            bunnyLineShader.setMat4("view", view);
+            bunnyLineShader.setMat4("model", model);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+        }
 
         scenePostdraw();
     }
