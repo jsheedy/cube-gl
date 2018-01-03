@@ -16,21 +16,27 @@ uniform float pulseHeight;
 
 out vec3 normal;
 flat out int instanceID;
+out vec4 fragPos;
+
+out float depth;
+uniform int selected;
 
 void main()
 {
-    float width = 200.0;
+    float width = 210.0;
     // vec2 offset = offsets[gl_InstanceID];
-    float x = width * (gl_InstanceID / 30 - 15);
-    float z = width * (gl_InstanceID % 30 - 15);
+    float x = width * (gl_InstanceID / 10 - 5);
+    float z = width * (gl_InstanceID % 10 - 5);
     vec2 offset = vec2(x,z);
 
     float y = aPos.y;
-    if (aPos.y < 10.0) {
-       y = aPos.y * pulseHeight;
-    }
+    // if (aPos.y < 10.0) {
+    //    y = aPos.y * pulseHeight;
+    // }
     // gl_Position = projection * view * model * vec4(aPos.x + offset.x, y, aPos.z + offset.y, 1.0);
-    gl_Position = MVP * vec4(aPos.x + offset.x, y, aPos.z + offset.y, 1.0);
+    vec4 pos = vec4(aPos.x + offset.x, y, aPos.z + offset.y, 1.0);
+    gl_Position = MVP * pos;
+    fragPos = view * pos;
 
     normal = aNormal;
     // normal = normalize(model * aNormal);
