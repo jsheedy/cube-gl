@@ -56,12 +56,18 @@ int main()
     OSCServer oscServer(37341);
     // oscServer.start();
 
+    glm::vec4 red(1.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
+    glm::vec4 blue(0.0f, 0.0f, 1.0f, 1.0f);
+
     // reverse the order of these to get some geometry glitch  ¯\_(ツ)_/¯
     Shader geometryShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
     Shader bunnyShader("shaders/vertex/passthru.vs", "shaders/fragment/bunny.fs", "shaders/geometry/geometry.gs");
+    Shader sphereShader("shaders/vertex/passthru.vs", "shaders/fragment/sphere.fs",  "shaders/geometry/geometry.gs");
     Shader cityShader("shaders/vertex/instanced.vs", "shaders/fragment/city.fs", NULL);
-    Shader cityLineShader("shaders/vertex/instanced.vs", "shaders/fragment/lines-blue.fs", NULL);
-    Shader bunnyLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines-blue.fs", NULL);
+    Shader cityLineShader("shaders/vertex/instanced.vs", "shaders/fragment/lines.fs", NULL);
+    Shader bunnyLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines.fs", NULL);
+    Shader sphereLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines.fs", NULL);
     Shader lineShader("shaders/vertex/lines.vs", "shaders/fragment/lines-blue.fs", "shaders/geometry/lines-wide.gs");
     Plane plane = Plane(N, M);
 
@@ -80,6 +86,7 @@ int main()
 
     Mesh bunnyMesh = bunnyModel.meshes[0];
     Mesh cityMesh = cityModel.meshes[0];
+    Mesh sphereMesh = sphereModel.meshes[0];
 
     glm::vec3 LookTarget;
 
@@ -210,18 +217,16 @@ int main()
         lineShader.setMat4("view", view);
         lineShader.setMat4("model", model);
 
-        Mesh sphereMesh = sphereModel.meshes[0];
-        glBindVertexArray(sphereMesh.VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereMesh.EBO);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
-
         glm::mat4 bunnyModelMatrix;
         bunnyModelMatrix = glm::translate(bunnyModelMatrix, glm::vec3(0.0, -35.0, 0.0));
         bunnyModelMatrix = glm::scale(bunnyModelMatrix, glm::vec3(1000.0f));
 
         glm::mat4 cityModelMatrix;
         // cityModelMatrix = glm::scale(cityModelMatrix, glm::vec3(1.0f));
+
+        glm::mat4 sphereModelMatrix;
+        sphereModelMatrix = glm::scale(sphereModelMatrix, glm::vec3(0.5f));
+        sphereModelMatrix = glm::rotate(sphereModelMatrix, glm::radians(t * 100.0f), glm::vec3(0.0, 1.0, 0.0));
 
         cityShader.use();
         cityShader.setFloat("t", t);
@@ -235,10 +240,10 @@ int main()
         cityLineShader.use();
         cityLineShader.setFloat("t", t);
         cityLineShader.setFloat("cameraX", camera.Position.x);
+        cityLineShader.setVec4("lineColor", blue);
         cityLineShader.setFloat("cameraZ", camera.Position.z);
         cityLineShader.setFloat("pulseHeight", pulseHeight);
         cityLineShader.setMat4("MVP", projection * view * cityModelMatrix);
-
 
         bunnyShader.use();
         bunnyShader.setFloat("t", t);
@@ -249,9 +254,25 @@ int main()
 
         bunnyLineShader.use();
         bunnyLineShader.setFloat("t", t);
+        bunnyLineShader.setVec4("lineColor", green);
         bunnyLineShader.setMat4("projection", projection);
         bunnyLineShader.setMat4("view", view);
         bunnyLineShader.setMat4("model", bunnyModelMatrix);
+
+        sphereShader.use();
+        sphereShader.setFloat("t", t);
+        sphereShader.setMat4("projection", projection);
+        sphereShader.setMat4("view", view);
+        sphereShader.setMat4("model", sphereModelMatrix);
+        sphereShader.setMat4("MVP", projection * view * sphereModelMatrix);
+
+        sphereLineShader.use();
+        sphereLineShader.setFloat("t", t);
+        sphereLineShader.setVec4("lineColor", red);
+        sphereLineShader.setMat4("projection", projection);
+        sphereLineShader.setMat4("view", view);
+        sphereLineShader.setMat4("model", sphereModelMatrix);
+        sphereLineShader.setMat4("MVP", projection * view * sphereModelMatrix);
 
         if (shaderStyle == FULL) {
 
@@ -267,6 +288,11 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
+            glBindVertexArray(sphereMesh.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereMesh.EBO);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+
         } else {
 
             cityLineShader.use();
@@ -281,6 +307,13 @@ int main()
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bunnyMesh.EBO);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawElements(GL_TRIANGLES, bunnyMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+            sphereLineShader.use();
+            glBindVertexArray(sphereMesh.VAO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereMesh.EBO);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
+
         }
 
         scenePostdraw();
