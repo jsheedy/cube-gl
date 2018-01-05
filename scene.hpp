@@ -2,6 +2,12 @@
 #include <GLFW/glfw3.h>
 
 #include "camera.h"
+#include "utils.hpp"
+
+enum ShaderStyle {
+    LINES_ONLY,
+    FULL
+};
 
 int width = 1400;
 int height = 900;
@@ -15,6 +21,11 @@ float lastX;
 float lastY;
 
 bool clearScreen = true;
+ShaderStyle shaderStyle = FULL;
+bool keyDown = false;
+
+
+float ROT_SLERP_MIX = 0.1f;
 
 GLFWwindow* window;
 
@@ -27,8 +38,59 @@ Camera camera = Camera(
 
 bool mDown = false;
 
+
 void processInput(GLFWwindow *window, float deltaTime)
 {
+
+    // handle additional keys with some janky debouncing
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && ! keyDown) {
+        keyDown = true;
+        camera.Action = CENTER_ROT;
+    }
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE) {
+        keyDown = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && ! keyDown) {
+        keyDown = true;
+        camera.Action = CENTER_HOVER;
+    }
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE) {
+        keyDown = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && ! keyDown) {
+        keyDown = true;
+        camera.Action = HOVER_BUNNY;
+    }
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE) {
+        keyDown = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && ! keyDown) {
+        keyDown = true;
+        shaderStyle = LINES_ONLY;
+    }
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE) {
+        keyDown = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && ! keyDown) {
+        keyDown = true;
+        shaderStyle = FULL;
+    }
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE) {
+        keyDown = false;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS && ! keyDown) {
+        keyDown = true;
+        camera.Action = FREELOOK;
+    }
+    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_RELEASE) {
+        keyDown = false;
+    }
+
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
@@ -77,6 +139,33 @@ void scenePredraw(Camera camera) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
     processInput(window, deltaTime);
+
+    if (camera.Action == CENTER_ROT) {
+
+        glm::vec3 TargetPosition(0.0f, 1000.0f, 0.0f);
+        glm::vec3 RightVector(1.0f, 0.0f, 0.0f);
+
+        glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), UpVector);
+        glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), RightVector);
+        glm::quat rot = rotDown * rotAround * glm::quat();
+        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
+        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+    }
+    else if (camera.Action == CENTER_HOVER) {
+        glm::vec3 TargetPosition(0.0f, 2000.0f, 0.0f);
+        glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
+        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+    }
+    else if (camera.Action == HOVER_BUNNY) {
+        glm::vec3 TargetPosition(10.0f * sin(t), 100.0f, 200.0f + 10.0f * cos(t));
+        glm::quat rot = glm::angleAxis(glm::radians(10.0f), glm::vec3(1.00f, 0.0f, 0.0f));
+        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
+        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+    }
+    else if (camera.Action == FREELOOK) {
+        //  ¯\_(ツ)_/¯
+    }
 }
 
 void scenePostdraw() {

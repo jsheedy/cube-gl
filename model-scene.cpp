@@ -20,26 +20,8 @@
 #include "scene.hpp"
 
 
-enum ShaderStyle {
-    LINES_ONLY,
-    FULL
-};
-
 unsigned int N = 100;
 unsigned int M = 100;
-
-float ROT_SLERP_MIX = 0.1f;
-
-ShaderStyle shaderStyle = FULL;
-
-glm::vec3 UpVector(0.0f, 1.0f, 0.0f);
-
-
-float angleBetween(glm::vec3 a, glm::vec3 b, glm::vec3 origin) {
-    glm::vec3 da=glm::normalize(a-origin);
-    glm::vec3 db=glm::normalize(b-origin);
-    return glm::acos(glm::dot(da, db));
-}
 
 void Draw(Model model, Shader shader) {
 
@@ -84,13 +66,13 @@ int main()
     Model bunnyModel((char *)"assets/bunny.ply");
     Model sphereModel((char *)"assets/sphere.ply");
 
+    Cube cube;
+
     Mesh bunnyMesh = bunnyModel.meshes[0];
     Mesh cityMesh = cityModel.meshes[0];
     Mesh sphereMesh = sphereModel.meshes[0];
 
     glm::vec3 LookTarget;
-
-    bool keyDown = false;
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -127,84 +109,6 @@ int main()
         }
 
         pulseHeight *= 0.95f;//60.0f * deltaTime;
-
-        // handle additional keys with some janky debouncing
-        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && ! keyDown) {
-            keyDown = true;
-            camera.Action = CENTER_ROT;
-        }
-        if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE) {
-            keyDown = false;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && ! keyDown) {
-            keyDown = true;
-            camera.Action = CENTER_HOVER;
-        }
-        if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE) {
-            keyDown = false;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && ! keyDown) {
-            keyDown = true;
-            camera.Action = HOVER_BUNNY;
-        }
-        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE) {
-            keyDown = false;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && ! keyDown) {
-            keyDown = true;
-            shaderStyle = LINES_ONLY;
-        }
-        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE) {
-            keyDown = false;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && ! keyDown) {
-            keyDown = true;
-            shaderStyle = FULL;
-        }
-        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE) {
-            keyDown = false;
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS && ! keyDown) {
-            keyDown = true;
-            camera.Action = FREELOOK;
-        }
-        if (glfwGetKey(window, GLFW_KEY_0) == GLFW_RELEASE) {
-            keyDown = false;
-        }
-
-        if (camera.Action == CENTER_ROT) {
-
-            glm::vec3 TargetPosition(0.0f, 1000.0f, 0.0f);
-            glm::vec3 RightVector(1.0f, 0.0f, 0.0f);
-
-            glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), UpVector);
-            glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), RightVector);
-            glm::quat rot = rotDown * rotAround * glm::quat();
-            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-            camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
-        }
-        else if (camera.Action == CENTER_HOVER) {
-            glm::vec3 TargetPosition(0.0f, 2000.0f, 0.0f);
-            glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-            camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
-        }
-        else if (camera.Action == HOVER_BUNNY) {
-            glm::vec3 TargetPosition(10.0f * sin(t), 100.0f, 200.0f + 10.0f * cos(t));
-            glm::quat rot = glm::angleAxis(glm::radians(10.0f), glm::vec3(1.00f, 0.0f, 0.0f));
-            camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-            camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
-        }
-        else if (camera.Action == FREELOOK) {
-            //  ¯\_(ツ)_/¯
-        }
-        float rotationAngle = 10.0f * t;
-
         glm::mat4 model;
 
         glm::mat4 view(camera.Orientation);
@@ -314,6 +218,7 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawElements(GL_TRIANGLES, sphereMesh.indices.size(), GL_UNSIGNED_INT, (void*)0);
 
+            cube.drawLines(bunnyLineShader, glm::mat4(), view, projection);
         }
 
         scenePostdraw();
