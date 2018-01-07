@@ -190,6 +190,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
     if (std::isnan(lastX) || std::isnan(lastY))
     {
+        // lastX = width / 2.0f;
+        // lastY = height / 2.0f;
         lastX = xpos;
         lastY = ypos;
     }

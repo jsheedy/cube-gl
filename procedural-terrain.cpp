@@ -28,10 +28,10 @@ int main()
 {
     GLFWwindow* window = sceneInit(width, height);
 
-    camera.Position = glm::vec3(0.0f, 2.0f, 10.0f);
-    camera.MovementSpeed = 1.0f;
+    camera.Position = glm::vec3(0.0f, 1.0f, 10.0f);
+    camera.MovementSpeed = 2.0f;
     camera.MouseSensitivity = 0.002f;
-    camera.LookAt(glm::vec3(0.0, 0.0, 0.0));
+    camera.LookAt(glm::vec3(0.0, -1.0, 0.0));
 
     OSCServer oscServer(37341);
     // oscServer.start();
@@ -39,16 +39,17 @@ int main()
     Cube cube;
 
     Shader terrainShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
-    Shader terrainLineShader("shaders/vertex/MVP.vs", "shaders/fragment/lines.fs", NULL);
+    Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/texture.fs", NULL);
     // Shader cubeShader("shaders/vertex/passthru.vs", "shaders/fragment/lines.fs", NULL);
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
 
-    unsigned int texture = loadTexture("assets/pavement.jpg", GL_RGBA);
-    // unsigned int texture = loadTexture("assets/neon toobs.png", GL_RGBA);
+    unsigned int pavementTexture = loadTexture("assets/01-uv-texture.jpg", GL_RGB);
+    // unsigned int pavementTexture = loadTexture("assets/pavement.jpg", GL_RGBA);
+    // unsigned int heightMapTexture = loadTexture("assets/iceland_terrain_map.png", GL_RED);
+    unsigned int heightMapTexture = loadTexture("assets/01-uv-texture.png", GL_RGB);
 
-    cubeShader.use();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    terrainLineShader.use();
+    terrainLineShader.setInt("texture1", 0);
 
     Plane plane = Plane(N, M);
     Axes axes = Axes();
@@ -60,18 +61,16 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    cubeShader.use();
-    cubeShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-
-    terrainLineShader.use();
-    terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-
     while(!glfwWindowShouldClose(window))
     {
         scenePredraw(camera);
 
         glm::mat4 view(camera.Orientation);
         view = glm::translate(view, -camera.Position);
+
+        cubeShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, pavementTexture);
 
         glm::mat4 model;
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
@@ -83,11 +82,19 @@ int main()
         model = glm::rotate(model, glm::radians(t * 90.0f), UpVector);
         cube.drawLines(cubeShader, model, view, projection);
 
+        terrainLineShader.use();
+        terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, heightMapTexture);
+
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
-        model = glm::scale(model, glm::vec3(25.0f, 25.0f, 25.0f));
+        model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
         plane.draw(terrainLineShader, model, view, projection);
+
         scenePostdraw();
+
+        // assert(glGetError() == GL_NO_ERROR);
     }
 
     glfwTerminate();

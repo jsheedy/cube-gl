@@ -26,8 +26,8 @@ class Plane: Geometry {
 
     Plane(int N, int M) {
 
-        sizePoints = N*M*3;
-        sizeIndices = sizePoints * 2;// - M - N;
+        sizePoints = N*M*3*2;
+        sizeIndices = sizePoints;// - M - N;
 
         float *points = new float[sizePoints];
         unsigned int *pointIndices = new unsigned int[sizeIndices];
@@ -43,6 +43,9 @@ class Plane: Geometry {
                 points[idx++] = (((float)i)/N - 0.5f);
                 points[idx++] = 0;
                 points[idx++] = (((float)j)/M - 0.5f);
+                // UV
+                points[idx++] = ((float)j)/M;
+                points[idx++] = ((float)i)/N;
 
                 // indexes
                 if (i < (N-1) && j < (M-1)) {
@@ -82,8 +85,11 @@ class Plane: Geometry {
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizePoints * sizeof(float), points, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3* sizeof(float)));
+        glEnableVertexAttribArray(1);
 
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

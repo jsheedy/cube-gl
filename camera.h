@@ -127,6 +127,11 @@ public:
         // Also re-calculate the Right and Up vector
         Right = glm::normalize(glm::cross(Front, WorldUp));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         Up    = glm::normalize(glm::cross(Right, Front));
+
+        // h/t https://stackoverflow.com/questions/23337151/trouble-converting-matrix-to-quaternion-and-back
+        // glm::vec3 lookAtPt = direction;
+        glm::mat4 rotMatrix = glm::lookAt(glm::vec3(0), Front, WorldUp);
+        Orientation = glm::quat_cast(rotMatrix);
     }
 
 private:

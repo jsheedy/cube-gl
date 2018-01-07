@@ -19,7 +19,6 @@ unsigned int loadTexture(const char* fname, const unsigned int imageFormat) {
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, imageFormat, GL_UNSIGNED_BYTE, textureData);
         glGenerateMipmap(GL_TEXTURE_2D);
-        std::cout << width << height << std::endl;
     }
     else
     {
