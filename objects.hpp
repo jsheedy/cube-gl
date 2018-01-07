@@ -95,20 +95,28 @@ class Plane: Geometry {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * sizeIndices, gridIndices, GL_STATIC_DRAW);
     }
 
-    void draw() {
+    void draw(Shader shader, glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
+        shader.use();
+        shader.setMat4("model", model);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
         glBindVertexArray(VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glDrawElements(GL_TRIANGLES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
     }
 
     void drawPoints() {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glDrawElements(GL_POINTS, sizeIndices, GL_UNSIGNED_INT, (void*)0);
     }
 
-    void drawLines() {
+    void drawLines(Shader shader, glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
+        shader.use();
+        shader.setMat4("model", model);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
         glBindVertexArray(VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->GridEBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GridEBO);
         glDrawElements(GL_LINES, sizeIndices, GL_UNSIGNED_INT, (void*)0);
     }
 };
