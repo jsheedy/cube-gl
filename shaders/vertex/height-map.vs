@@ -17,6 +17,7 @@ void main()
 
     vec4 pos = vec4(aPos, 1.0);
     pos.y += texel.x / 10.0;
-    gl_Position = projection * view * model * pos;
+    gl_Position = pos;
+    // gl_Position = projection * view * model * pos;
     TexCoords = aTexCoords;
 }

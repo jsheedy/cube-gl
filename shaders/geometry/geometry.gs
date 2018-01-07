@@ -3,8 +3,11 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices=3) out;
 
+in vec2 TexCoords[];
+
 out vec3 fragPos;
 out vec3 normal;
+out vec2 texCoords;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -25,13 +28,17 @@ void main() {
     mat4 PV = projection * view;
 
     gl_Position = PV * v1;
+    texCoords = TexCoords[0];
     EmitVertex();
 
     gl_Position = PV * v2;
+    texCoords = TexCoords[1];
     EmitVertex();
 
     gl_Position = PV * v3;
+    texCoords = TexCoords[2];
     EmitVertex();
 
     EndPrimitive();
+
 }
