@@ -6,6 +6,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform float t;
 uniform sampler2D heightMap;
 
 out vec2 TexCoords;
@@ -16,7 +17,8 @@ void main()
     vec4 texel = textureLod(heightMap, aTexCoords, 0.0);
 
     vec4 pos = vec4(aPos, 1.0);
-    pos.y += texel.x / 10.0;
+    float scale = sin(0.6 * t) + 1.0;
+    pos.y += scale * texel.x / 20.0;
     gl_Position = pos;
     // gl_Position = projection * view * model * pos;
     TexCoords = aTexCoords;

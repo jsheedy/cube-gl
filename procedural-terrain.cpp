@@ -21,8 +21,8 @@
 #include "utils.hpp"
 
 
-unsigned int N = 100;
-unsigned int M = 100;
+unsigned int N = 1024;
+unsigned int M = 1024;
 
 int main()
 {
@@ -39,7 +39,8 @@ int main()
     Cube cube;
 
     // Shader terrainShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
-    Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
+    Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", "shaders/geometry/geometry.gs");
+    // Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
     // Shader cubeShader("shaders/vertex/passthru.vs", "shaders/fragment/lines.fs", NULL);
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
 
@@ -83,10 +84,12 @@ int main()
         cube.drawLines(cubeShader, model, view, projection);
 
         terrainLineShader.use();
+        terrainLineShader.setFloat("t", t);
         terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, uvTestTexture);
+        glBindTexture(GL_TEXTURE_2D, heightMapTexture);
+        // glBindTexture(GL_TEXTURE_2D, uvTestTexture);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, heightMapTexture);
 

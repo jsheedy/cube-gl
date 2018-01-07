@@ -15,9 +15,9 @@ void main()
     // FragColor = vec4(fragPos.x,diff, 0, 0);
 
     FragColor = vec4(
-        diff,
-        diff,
-        diff,
+        diff * fragPos.y,
+        diff * fragPos.x,
+        diff * fragPos.z,
         1.0
     );
     // FragColor = vec4(1.0, 1.0, 1.0, 1.0);

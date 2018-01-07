@@ -44,8 +44,8 @@ class Plane: Geometry {
                 points[idx++] = 0;
                 points[idx++] = (((float)j)/M - 0.5f);
                 // UV
-                points[idx++] = ((float)j)/M;
                 points[idx++] = ((float)i)/N;
+                points[idx++] = ((float)j)/M;
 
                 // indexes
                 if (i < (N-1) && j < (M-1)) {
