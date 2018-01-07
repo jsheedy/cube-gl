@@ -43,13 +43,13 @@ int main()
     // Shader cubeShader("shaders/vertex/passthru.vs", "shaders/fragment/lines.fs", NULL);
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
 
-    unsigned int pavementTexture = loadTexture("assets/01-uv-texture.jpg", GL_RGB);
-    // unsigned int pavementTexture = loadTexture("assets/pavement.jpg", GL_RGBA);
-    // unsigned int heightMapTexture = loadTexture("assets/iceland_terrain_map.png", GL_RED);
-    unsigned int heightMapTexture = loadTexture("assets/01-uv-texture.png", GL_RGB);
+    unsigned int pavementTexture = loadTexture("assets/pavement.jpg", GL_RGBA);
+    unsigned int heightMapTexture = loadTexture("assets/iceland_terrain_map.png", GL_RED);
+    unsigned int uvTestTexture = loadTexture("assets/01-uv-texture.png", GL_RGB);
 
     terrainLineShader.use();
     terrainLineShader.setInt("texture1", 0);
+    terrainLineShader.setInt("heightMap", 1);
 
     Plane plane = Plane(N, M);
     Axes axes = Axes();
@@ -84,7 +84,10 @@ int main()
 
         terrainLineShader.use();
         terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
         glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, uvTestTexture);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, heightMapTexture);
 
         model = glm::mat4();
