@@ -21,7 +21,8 @@ void main()
     // FragColor = vec4(fragPos.x,diff, 0, 0);
 
     vec4 ambient = vec4(0.1, 0.1, 0.5, 1.0);
-    FragColor = ambient +  direct * texture(texture1, texCoords) + 0.2 * diff * texture(texture1, texCoords);
+    FragColor = ambient +  direct * vec4(0.0, 1.0, 0.0, 1.0) + 0.2 * diff * texture(texture1, texCoords);
+    // FragColor = ambient +  direct * texture(texture1, texCoords) + 0.2 * diff * texture(texture1, texCoords);
 
     // FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
