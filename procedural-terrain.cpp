@@ -96,7 +96,7 @@ int main()
 
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
-        model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
+        model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
         plane.draw(terrainLineShader, model, view, projection);
 
         scenePostdraw();

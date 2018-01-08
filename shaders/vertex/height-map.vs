@@ -18,7 +18,7 @@ void main()
 
     vec4 pos = vec4(aPos, 1.0);
     // float scale = 0.01 * (sin(0.6 * t) + 1.0);
-    float scale = 0.02;
+    float scale = 0.01;
     pos.y += scale * texel.x;
     gl_Position = pos;
     // gl_Position = projection * view * model * pos;
