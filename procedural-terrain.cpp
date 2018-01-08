@@ -21,8 +21,8 @@
 #include "utils.hpp"
 
 
-unsigned int N = 1024;
-unsigned int M = 1024;
+unsigned int N = 2048;
+unsigned int M = 2048;
 
 int main()
 {
@@ -45,7 +45,8 @@ int main()
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
 
     unsigned int pavementTexture = loadTexture("assets/pavement.jpg", GL_RGBA);
-    unsigned int heightMapTexture = loadTexture("assets/iceland_terrain_map.png", GL_RED);
+    unsigned int heightMapTexture = loadTexture("assets/srtm_12_03-2048x2048.png", GL_RED); // gdal_translate -of PNG -ot Byte -scale srtm_12_03.tif srtm_12_03.png  ; convert -scale 2048x2048 assets/srtm_12_03.png assets/srtm_12_03-2048x2048.png
+    // unsigned int heightMapTexture = loadTexture("assets/iceland_terrain_map.png", GL_RED);
     unsigned int uvTestTexture = loadTexture("assets/01-uv-texture.png", GL_RGB);
 
     terrainLineShader.use();
