@@ -21,8 +21,17 @@
 #include "utils.hpp"
 
 
-unsigned int N = 2048;
-unsigned int M = 2048;
+// unsigned int N = 128;
+// unsigned int M = 128;
+
+// unsigned int N = 512;
+// unsigned int M = 512;
+
+unsigned int N = 1024;
+unsigned int M = 1024;
+
+// unsigned int N = 2048;
+// unsigned int M = 2048;
 
 int main()
 {
@@ -35,6 +44,7 @@ int main()
 
     OSCServer oscServer(37341);
     // oscServer.start();
+
 
     Cube cube;
 
@@ -65,10 +75,9 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
-        scenePredraw(camera);
+        scenePredraw();
 
-        glm::mat4 view(camera.Orientation);
-        view = glm::translate(view, -camera.Position);
+        glm::mat4 view = camera.GetViewMatrix();
 
         cubeShader.use();
         glActiveTexture(GL_TEXTURE0);

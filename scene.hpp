@@ -41,95 +41,76 @@ bool mDown = false;
 
 void processInput(GLFWwindow *window, float deltaTime)
 {
-
-    // handle additional keys with some janky debouncing
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && ! keyDown) {
-        keyDown = true;
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
         camera.Action = CENTER_ROT;
     }
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE) {
-        keyDown = false;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS && ! keyDown) {
-        keyDown = true;
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
         camera.Action = CENTER_HOVER;
     }
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE) {
-        keyDown = false;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS && ! keyDown) {
-        keyDown = true;
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
         camera.Action = HOVER_BUNNY;
     }
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE) {
-        keyDown = false;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS && ! keyDown) {
-        keyDown = true;
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
         shaderStyle = LINES_ONLY;
     }
-    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE) {
-        keyDown = false;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS && ! keyDown) {
-        keyDown = true;
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS) {
         shaderStyle = FULL;
     }
-    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE) {
-        keyDown = false;
-    }
 
-    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS && ! keyDown) {
-        keyDown = true;
+    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
         camera.Action = FREELOOK;
     }
-    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_RELEASE) {
-        keyDown = false;
-    }
 
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
 
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS && !mDown) {
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         clearScreen = !clearScreen;
-        mDown = true;
     }
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
-        mDown = false;
 
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mDown) {
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
         camera.Action = FREELOOK;
-        mDown = true;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE)
-        mDown = false;
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) == GLFW_PRESS){
         camera.MovementSpeed *= 1.2;
+    }
 
-    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) == GLFW_PRESS) {
         camera.MovementSpeed /= 1.2;
+    }
 
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
         camera.ProcessKeyboard(UP, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
         camera.ProcessKeyboard(DOWN, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
 }
 
-void scenePredraw(Camera camera) {
+void scenePredraw() {
     t = glfwGetTime() * timeMultiplier;
     deltaTime = t - lastFrame;
     lastFrame = t;
@@ -142,7 +123,7 @@ void scenePredraw(Camera camera) {
 
     if (camera.Action == CENTER_ROT) {
 
-        glm::vec3 TargetPosition(0.0f, 1000.0f, 0.0f);
+        glm::vec3 TargetPosition(0.0f, 10.0f, 0.0f);
         glm::vec3 RightVector(1.0f, 0.0f, 0.0f);
 
         glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), UpVector);
@@ -152,13 +133,13 @@ void scenePredraw(Camera camera) {
         camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
     }
     else if (camera.Action == CENTER_HOVER) {
-        glm::vec3 TargetPosition(0.0f, 2000.0f, 0.0f);
+        glm::vec3 TargetPosition(0.0f, 50.0f, 0.0f);
         glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
         camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
     }
     else if (camera.Action == HOVER_BUNNY) {
-        glm::vec3 TargetPosition(10.0f * sin(t), 100.0f, 200.0f + 10.0f * cos(t));
+        glm::vec3 TargetPosition(5.0f * sin(t), 10.0f, 30.0f + 5.0f * cos(t));
         glm::quat rot = glm::angleAxis(glm::radians(10.0f), glm::vec3(1.00f, 0.0f, 0.0f));
         camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
         camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);

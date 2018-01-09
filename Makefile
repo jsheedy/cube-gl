@@ -15,7 +15,7 @@ cube-geometry-shader: objects.hpp scene.hpp osc.hpp osc.cpp cube-geometry-shader
 model-scene: model-scene.cpp model.hpp objects.hpp scene.hpp osc.hpp osc.cpp shader.h shaders/vertex/brain-glow.vs shaders/fragment/brain-glow.fs shaders/vertex/geometry.vs shaders/fragment/geometry.fs shaders/geometry/geometry.gs
 	g++ $(CPP_FLAGS) `pkg-config --libs assimp` `pkg-config --cflags liblo` `pkg-config --libs liblo` `pkg-config --cflags glfw3` -o model-scene model-scene.cpp osc.cpp glad.c  `pkg-config --static --libs glfw3` -I .
 
-procedural-terrain: *.cpp *.h shaders/*/*
+procedural-terrain: *.cpp *.h *.hpp shaders/*/*
 	g++ $(CPP_FLAGS) `pkg-config --libs assimp` `pkg-config --cflags liblo` `pkg-config --libs liblo` `pkg-config --cflags glfw3` -o procedural-terrain procedural-terrain.cpp osc.cpp glad.c  `pkg-config --static --libs glfw3` -I .
 
 clean:
