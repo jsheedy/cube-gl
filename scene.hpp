@@ -25,7 +25,7 @@ ShaderStyle shaderStyle = FULL;
 bool keyDown = false;
 
 
-float ROT_SLERP_MIX = 0.1f;
+float ROT_SLERP_MIX = 2.0f;
 
 GLFWwindow* window;
 
@@ -123,26 +123,26 @@ void scenePredraw() {
 
     if (camera.Action == CENTER_ROT) {
 
-        glm::vec3 TargetPosition(0.0f, 10.0f, 0.0f);
+        glm::vec3 TargetPosition(0.0f, 3.0f, 0.0f);
         glm::vec3 RightVector(1.0f, 0.0f, 0.0f);
 
         glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), UpVector);
         glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), RightVector);
         glm::quat rot = rotDown * rotAround * glm::quat();
-        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX * deltaTime);
+        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX * deltaTime);
     }
     else if (camera.Action == CENTER_HOVER) {
-        glm::vec3 TargetPosition(0.0f, 50.0f, 0.0f);
+        glm::vec3 TargetPosition(0.0f, 3.0f, 0.0f);
         glm::quat rot = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX * deltaTime);
+        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX * deltaTime);
     }
     else if (camera.Action == HOVER_BUNNY) {
-        glm::vec3 TargetPosition(5.0f * sin(t), 10.0f, 30.0f + 5.0f * cos(t));
+        glm::vec3 TargetPosition(5.0f * sin(t), 3.0f, 30.0f + 5.0f * cos(t));
         glm::quat rot = glm::angleAxis(glm::radians(10.0f), glm::vec3(1.00f, 0.0f, 0.0f));
-        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX);
-        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX);
+        camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX * deltaTime);
+        camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX * deltaTime);
     }
     else if (camera.Action == FREELOOK) {
         //  ¯\_(ツ)_/¯
