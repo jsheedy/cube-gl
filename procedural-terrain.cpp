@@ -50,6 +50,7 @@ int main()
 
 
     Cube cube;
+    Axes axes;
 
     // Shader terrainShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
     Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", "shaders/geometry/geometry.gs");
@@ -72,7 +73,6 @@ int main()
     terrainLineShader.setInt("heightMap", 1);
 
     Plane plane = Plane(N, M);
-    Axes axes = Axes();
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
 
@@ -100,6 +100,8 @@ int main()
         model = glm::translate(model, glm::vec3(-2.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(t * 90.0f), UpVector);
         cube.drawLines(cubeShader, model, view, projection);
+
+        axes.drawLines(view, projection);
 
         terrainLineShader.use();
         terrainLineShader.setFloat("t", t);

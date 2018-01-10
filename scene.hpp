@@ -220,5 +220,8 @@ GLFWwindow* sceneInit(int width, int height)
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
 
+    // backface culling
+    glEnable(GL_CULL_FACE);
+
     return window;
 }

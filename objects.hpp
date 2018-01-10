@@ -189,18 +189,27 @@ class Axes: Geometry {
 
         glGenBuffers(1, &EBO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * 2, pointIndices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int) * 6, pointIndices, GL_STATIC_DRAW);
 
     }
 
-    void drawLines(glm::mat4 model, glm::mat4 view, glm::mat4 projection) {
+    void drawLines(glm::mat4 view, glm::mat4 projection) {
         shader->use();
+        glm::mat4 model = glm::mat4();;
         shader->setMat4("model", model);
         shader->setMat4("view", view);
         shader->setMat4("projection", projection);
         glBindVertexArray(VAO);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glDrawElements(GL_LINES, 3, GL_UNSIGNED_INT, (void*)0);
+
+        shader->setVec4("lineColor", glm::vec4(1.0, 0.0, 0.0, 1.0));
+        glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, (void*)(sizeof(int) * 0));
+
+        shader->setVec4("lineColor", glm::vec4(0.0, 1.0, 0.0, 1.0));
+        glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, (void*)(sizeof(int) * 2));
+
+        shader->setVec4("lineColor", glm::vec4(0.0, 0.0, 1.0, 1.0));
+        glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, (void*)(sizeof(int) * 4));
     }
 };
 
@@ -277,7 +286,7 @@ class Cube : Geometry {
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         glBindVertexArray(VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO);
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
