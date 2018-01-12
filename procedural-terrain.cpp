@@ -61,7 +61,6 @@ int main()
     OSCServer oscServer(37341);
     // oscServer.start();
 
-
     Cube cube;
     Axes axes;
 
@@ -121,7 +120,7 @@ int main()
         drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, uvTestTexture, heightMapTexture_12_04);
         drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, uvTestTexture, heightMapTexture_13_04);
 
-        scenePostdraw();
+        scenePostdraw(window);
     }
 
     glfwTerminate();
