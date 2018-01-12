@@ -36,6 +36,16 @@ unsigned int M = 512;
 // unsigned int N = 2048;
 // unsigned int M = 2048;
 
+void drawPlane(Plane plane, Shader shader, glm::vec3 loc, glm::mat4 view, glm::mat4 projection, unsigned int heightTexture, unsigned int texture) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, heightTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glm::mat4 model = glm::translate(glm::mat4(), loc);
+    plane.draw(shader, model, view, projection);
+}
+
 int main()
 {
     GLFWwindow* window = sceneInit(width, height);
@@ -66,6 +76,7 @@ int main()
     unsigned int heightMapTexture_13_04 = loadTexture("assets/srtm/srtm_13_04-2048x2048.png", GL_RED); // gdal_translate -of PNG -ot Byte -scale srtm_12_03.tif srtm_12_03.png  ; convert -scale 2048x2048 assets/srtm_12_03.png assets/srtm_12_03-2048x2048.png
 
     // unsigned int heightMapTexture = loadTexture("assets/iceland_terrain_map.png", GL_RED);
+    // unsigned int uvTestTexture = loadTexture("assets/height-experiment.png", GL_RGBA);
     unsigned int uvTestTexture = loadTexture("assets/01-uv-texture.png", GL_RGB);
 
     terrainLineShader.use();
@@ -107,55 +118,12 @@ int main()
         terrainLineShader.setFloat("t", t);
         terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-        // draw planes x4
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_12_03);
-        // glBindTexture(GL_TEXTURE_2D, uvTestTexture);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_12_03);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        plane.draw(terrainLineShader, model, view, projection);
-
-        // plane 2
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_13_03);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_13_03);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        plane.draw(terrainLineShader, model, view, projection);
-
-        // plane 3
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_12_04);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_12_04);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        plane.draw(terrainLineShader, model, view, projection);
-
-        // plane 4
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_13_04);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, heightMapTexture_13_04);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(1.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-        plane.draw(terrainLineShader, model, view, projection);
+        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, uvTestTexture, heightMapTexture_12_03);
+        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, uvTestTexture, heightMapTexture_13_03);
+        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, uvTestTexture, heightMapTexture_12_04);
+        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, uvTestTexture, heightMapTexture_13_04);
 
         scenePostdraw();
-
-        // assert(glGetError() == GL_NO_ERROR);
     }
 
     glfwTerminate();

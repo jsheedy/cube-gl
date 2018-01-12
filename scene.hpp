@@ -139,7 +139,7 @@ void scenePredraw() {
         camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX * deltaTime);
     }
     else if (camera.Action == HOVER_BUNNY) {
-        glm::vec3 TargetPosition(5.0f * sin(t), 3.0f, 30.0f + 5.0f * cos(t));
+        glm::vec3 TargetPosition(0.0f, 1.0f, 5.0f);
         glm::quat rot = glm::angleAxis(glm::radians(10.0f), glm::vec3(1.00f, 0.0f, 0.0f));
         camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX * deltaTime);
         camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX * deltaTime);
