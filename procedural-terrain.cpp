@@ -68,6 +68,7 @@ int main()
     // Shader cubeShader("shaders/vertex/passthru.vs", "shaders/fragment/lines.fs", NULL);
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
 
+    // unsigned int pavementTexture = loadTexture("assets/ESO_-_Milky_Way.jpg", GL_RGBA);
     unsigned int pavementTexture = loadTexture("assets/pavement.jpg", GL_RGBA);
 
     unsigned int heightMapTexture_12_03 = loadTexture("assets/srtm/srtm_12_03-2048x2048.png", GL_RED); // gdal_translate -of PNG -ot Byte -scale srtm_12_03.tif srtm_12_03.png  ; convert -scale 2048x2048 assets/srtm_12_03.png assets/srtm_12_03-2048x2048.png
@@ -100,15 +101,9 @@ int main()
 
         cubeShader.use();
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, pavementTexture);
+        glBindTexture(GL_TEXTURE_2D, uvTestTexture);
 
-        glm::mat4 model;
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, glm::radians(t * 90.0f), ForwardVector);
-        cube.drawLines(cubeShader, model, view, projection);
-
-        model = glm::mat4();
-        model = glm::translate(model, glm::vec3(-2.0f, 0.0f, 0.0f));
+        glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(t * 90.0f), UpVector);
         cube.drawLines(cubeShader, model, view, projection);
 

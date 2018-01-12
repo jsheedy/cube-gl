@@ -222,6 +222,7 @@ GLFWwindow* sceneInit(int width, int height)
 
     // backface culling
     glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
 
     return window;
 }
