@@ -21,6 +21,9 @@
 #include "utils.hpp"
 
 
+// unsigned int N = 64;
+// unsigned int M = 64;
+
 // unsigned int N = 128;
 // unsigned int M = 128;
 
@@ -104,7 +107,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, uvTestTexture);
 
         glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, glm::radians(t * 90.0f), UpVector);
+        model = glm::rotate(model, glm::radians(t * 30.0f), UpVector);
         cube.drawLines(cubeShader, model, view, projection);
 
         axes.drawLines(view, projection);
