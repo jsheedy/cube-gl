@@ -7,6 +7,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform float t;
+uniform float pulseHeight;
 uniform sampler2D heightMap;
 
 out vec2 TexCoords;
@@ -19,7 +20,7 @@ void main()
     vec4 pos = vec4(aPos, 1.0);
     // float scale = 0.01 * (sin(0.6 * t) + 1.0);
     float scale = 0.05;
-    pos.y += scale * texel.x;
+    pos.y += scale * pulseHeight * texel.x;
     gl_Position = pos;
     // gl_Position = projection * view * model * pos;
     TexCoords = aTexCoords;

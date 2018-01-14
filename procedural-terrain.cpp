@@ -30,11 +30,11 @@
 // unsigned int N = 256;
 // unsigned int M = 256;
 
-unsigned int N = 512;
-unsigned int M = 512;
+// unsigned int N = 512;
+// unsigned int M = 512;
 
-// unsigned int N = 1024;
-// unsigned int M = 1024;
+unsigned int N = 1024;
+unsigned int M = 1024;
 
 // unsigned int N = 2048;
 // unsigned int M = 2048;
@@ -59,7 +59,7 @@ int main()
     camera.LookAt(glm::vec3(0.0, -1.0, 0.0));
 
     OSCServer oscServer(37341);
-    // oscServer.start();
+    oscServer.start();
 
     Cube cube;
     Axes axes;
@@ -95,8 +95,24 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    std::vector<EnvelopeEvent> *envelopeQueue = &oscServer.envelopeQueue[1];
+    std::vector<MetronomeEvent> *metronomeQueue = &oscServer.metronomeQueue;
+
+    float pulseHeight = 0.0f;
+    float lightIntensity = 1.0f;
     while(!glfwWindowShouldClose(window))
     {
+        while (!envelopeQueue->empty()) {
+            EnvelopeEvent event = envelopeQueue->back();
+            envelopeQueue->pop_back();
+            pulseHeight = event.value;
+        }
+        while (!metronomeQueue->empty()) {
+            MetronomeEvent event = metronomeQueue->back();
+            metronomeQueue->pop_back();
+            lightIntensity = 1.0f;
+        }
+
         scenePredraw();
 
         glm::mat4 view = camera.GetViewMatrix();
@@ -107,20 +123,24 @@ int main()
 
         glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(t * 30.0f), UpVector);
+        model = glm::scale(model, glm::vec3(0.2f));
         cube.drawLines(cubeShader, model, view, projection);
 
         axes.drawLines(view, projection);
 
         terrainLineShader.use();
         terrainLineShader.setFloat("t", t);
+        terrainLineShader.setFloat("pulseHeight", pulseHeight);
+        terrainLineShader.setFloat("lightIntensity", lightIntensity);
         terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, uvTestTexture, heightMapTexture_12_03);
-        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, uvTestTexture, heightMapTexture_13_03);
-        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, uvTestTexture, heightMapTexture_12_04);
-        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, uvTestTexture, heightMapTexture_13_04);
+        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
+        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
+        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
+        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
 
         scenePostdraw(window);
+        // lightIntensity *= 0.8f;
     }
 
     glfwTerminate();
