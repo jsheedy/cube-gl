@@ -6,6 +6,7 @@
 
 enum ShaderStyle {
     WIREFRAME,
+    WIREFRAME_GRID,
     FULL
 };
 
@@ -62,6 +63,10 @@ void processInput(GLFWwindow *window, float deltaTime)
     }
 
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        shaderStyle = WIREFRAME_GRID;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
         shaderStyle = FULL;
     }
 
@@ -69,7 +74,7 @@ void processInput(GLFWwindow *window, float deltaTime)
         glfwSetWindowShouldClose(window, true);
     }
 
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
         clearScreen = !clearScreen;
     }
 

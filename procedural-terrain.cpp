@@ -62,6 +62,16 @@ void drawPlaneWireframe(Plane plane, Shader shader, glm::vec3 loc, glm::mat4 vie
     plane.drawLines(shader, model, view, projection);
 }
 
+void drawPlaneWireframeGrid(Plane plane, Shader shader, glm::vec3 loc, glm::mat4 view, glm::mat4 projection, unsigned int heightTexture, unsigned int texture) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, heightTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glm::mat4 model = glm::translate(glm::mat4(), loc);
+    plane.drawGridLines(shader, model, view, projection);
+}
+
 int main()
 {
     GLFWwindow* window = sceneInit(width, height);
@@ -147,7 +157,16 @@ int main()
 
         axes.drawLines(view, projection);
 
-        if (shaderStyle == WIREFRAME) {
+        if (shaderStyle == WIREFRAME_GRID) {
+            terrainLineShader.use();
+            terrainLineShader.setFloat("t", t);
+            terrainLineShader.setFloat("pulseHeight", pulseHeight);
+            terrainLineShader.setFloat("lightIntensity", lightIntensity);
+            terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+            drawPlaneWireframeGrid(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
+        }
+        else if (shaderStyle == WIREFRAME) {
             terrainLineShader.use();
             terrainLineShader.setFloat("t", t);
             terrainLineShader.setFloat("pulseHeight", pulseHeight);
@@ -156,7 +175,7 @@ int main()
 
             drawPlaneWireframe(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
         }
-        if (shaderStyle == FULL) {
+        else if (shaderStyle == FULL) {
             terrainShader.use();
             terrainShader.setFloat("t", t);
             terrainShader.setFloat("pulseHeight", pulseHeight);
