@@ -5,7 +5,7 @@
 #include "utils.hpp"
 
 enum ShaderStyle {
-    LINES_ONLY,
+    WIREFRAME,
     FULL
 };
 
@@ -53,16 +53,16 @@ void processInput(GLFWwindow *window, float deltaTime)
         camera.Action = HOVER_BUNNY;
     }
 
-    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
-        shaderStyle = LINES_ONLY;
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS) {
-        shaderStyle = FULL;
-    }
-
     if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
         camera.Action = FREELOOK;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+        shaderStyle = WIREFRAME;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        shaderStyle = FULL;
     }
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -123,11 +123,11 @@ void scenePredraw() {
 
     if (camera.Action == CENTER_ROT) {
 
-        glm::vec3 TargetPosition(0.0f, 3.0f, 0.0f);
+        glm::vec3 TargetPosition(0.0f, 0.2f, 0.0f);
         glm::vec3 RightVector(1.0f, 0.0f, 0.0f);
 
-        glm::quat rotAround = glm::angleAxis(glm::radians(20.0f * t), UpVector);
-        glm::quat rotDown = glm::angleAxis(glm::radians(45.0f), RightVector);
+        glm::quat rotAround = glm::angleAxis(glm::radians(5.0f * t), UpVector);
+        glm::quat rotDown = glm::angleAxis(glm::radians(35.0f), RightVector);
         glm::quat rot = rotDown * rotAround * glm::quat();
         camera.Position = glm::mix(camera.Position, TargetPosition, ROT_SLERP_MIX * deltaTime);
         camera.Orientation = glm::mix(camera.Orientation, rot, ROT_SLERP_MIX * deltaTime);

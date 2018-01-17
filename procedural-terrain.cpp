@@ -52,6 +52,16 @@ void drawPlane(Plane plane, Shader shader, glm::vec3 loc, glm::mat4 view, glm::m
     plane.draw(shader, model, view, projection);
 }
 
+void drawPlaneWireframe(Plane plane, Shader shader, glm::vec3 loc, glm::mat4 view, glm::mat4 projection, unsigned int heightTexture, unsigned int texture) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, heightTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glm::mat4 model = glm::translate(glm::mat4(), loc);
+    plane.drawLines(shader, model, view, projection);
+}
+
 int main()
 {
     GLFWwindow* window = sceneInit(width, height);
@@ -62,15 +72,16 @@ int main()
     camera.LookAt(glm::vec3(0.0, -1.0, 0.0));
 
     OSCServer oscServer(37341);
-    oscServer.start();
+    // oscServer.start();
 
     Cube cube;
     Axes axes;
 
     // Shader terrainShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
-    // Shader terrainLineShaderHeightMapNormals("shaders/vertex/height-map-normals.vs", "shaders/fragment/geometry-texture.fs", NULL);
-    Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", "shaders/geometry/geometry.gs");
-    // Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
+    // Shader terrainShaderHeightMapNormals("shaders/vertex/height-map-normals.vs", "shaders/fragment/geometry-texture.fs", NULL);
+    Shader terrainShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", "shaders/geometry/geometry.gs");
+    Shader terrainLineShader("shaders/vertex/height-map-MVP.vs", "shaders/fragment/lines.fs", NULL);
+    // Shader terrainShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
     // Shader cubeShader("shaders/vertex/passthru.vs", "shaders/fragment/lines.fs", NULL);
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
 
@@ -86,8 +97,12 @@ int main()
     // unsigned int uvTestTexture = loadTexture("assets/height-experiment.png", GL_RGBA);
     unsigned int uvTestTexture = loadTexture("assets/01-uv-texture.png", GL_RGB);
 
+    terrainShader.use();
+    terrainShader.setInt("texture1", 0);
+    terrainShader.setInt("heightMap", 1);
+
     terrainLineShader.use();
-    terrainLineShader.setInt("texture1", 0);
+    terrainLineShader.setVec4("lineColor", glm::vec4(0.0, 1.0, 0.0, 1.0));
     terrainLineShader.setInt("heightMap", 1);
 
     Plane plane = Plane(N, M);
@@ -102,7 +117,7 @@ int main()
     std::vector<EnvelopeEvent> *envelopeQueue = &oscServer.envelopeQueue[1];
     std::vector<MetronomeEvent> *metronomeQueue = &oscServer.metronomeQueue;
 
-    float pulseHeight = 0.0f;
+    float pulseHeight = 1.0f;
     float lightIntensity = 1.0f;
     while(!glfwWindowShouldClose(window))
     {
@@ -132,16 +147,27 @@ int main()
 
         axes.drawLines(view, projection);
 
-        terrainLineShader.use();
-        terrainLineShader.setFloat("t", t);
-        terrainLineShader.setFloat("pulseHeight", pulseHeight);
-        terrainLineShader.setFloat("lightIntensity", lightIntensity);
-        terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+        if (shaderStyle == WIREFRAME) {
+            terrainLineShader.use();
+            terrainLineShader.setFloat("t", t);
+            terrainLineShader.setFloat("pulseHeight", pulseHeight);
+            terrainLineShader.setFloat("lightIntensity", lightIntensity);
+            terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
-        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
-        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
-        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
+            drawPlaneWireframe(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
+        }
+        if (shaderStyle == FULL) {
+            terrainShader.use();
+            terrainShader.setFloat("t", t);
+            terrainShader.setFloat("pulseHeight", pulseHeight);
+            terrainShader.setFloat("lightIntensity", lightIntensity);
+            terrainShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+
+            drawPlane(plane, terrainShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
+            drawPlane(plane, terrainShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
+            drawPlane(plane, terrainShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
+            drawPlane(plane, terrainShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
+        }
 
         scenePostdraw(window);
         // lightIntensity *= 0.8f;
