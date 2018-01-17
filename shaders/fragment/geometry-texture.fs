@@ -12,7 +12,7 @@ uniform sampler2D texture1;
 
 void main()
 {
-    float w = 0.50;
+    float w = 0.01;
     vec3 lightDir = normalize(vec3(100.0 * sin(w*t), 20.0, 100.0 * cos(w*t)));
     // vec3 lightDir = normalize(vec3(sin(t)*100.0, min(abs(cos(t)), 0.4)*100.0 , 0.0));
     float direct = max(dot(normal, lightDir), 0.0);

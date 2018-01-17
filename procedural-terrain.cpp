@@ -30,14 +30,17 @@
 // unsigned int N = 256;
 // unsigned int M = 256;
 
-// unsigned int N = 512;
-// unsigned int M = 512;
+unsigned int N = 512;
+unsigned int M = 512;
 
-unsigned int N = 1024;
-unsigned int M = 1024;
+// unsigned int N = 1024;
+// unsigned int M = 1024;
 
 // unsigned int N = 2048;
 // unsigned int M = 2048;
+
+// unsigned int N = 4096;
+// unsigned int M = 4096;
 
 void drawPlane(Plane plane, Shader shader, glm::vec3 loc, glm::mat4 view, glm::mat4 projection, unsigned int heightTexture, unsigned int texture) {
     glActiveTexture(GL_TEXTURE0);
@@ -55,7 +58,7 @@ int main()
 
     camera.Position = glm::vec3(0.0f, 1.5f, 2.0f);
     camera.MovementSpeed = 2.0f;
-    camera.MouseSensitivity = 0.002f;
+    camera.MouseSensitivity = 0.0005f;
     camera.LookAt(glm::vec3(0.0, -1.0, 0.0));
 
     OSCServer oscServer(37341);
@@ -88,7 +91,7 @@ int main()
 
     Plane plane = Plane(N, M);
 
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.01f, 100.0f);
 
     bool keyDown = false;
 
@@ -121,7 +124,7 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, uvTestTexture);
 
-        glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 0.0f));
+        glm::mat4 model = glm::translate(glm::mat4(), glm::vec3(-1.0f, 0.0f, 0.0f));
         model = glm::rotate(model, glm::radians(t * 30.0f), UpVector);
         model = glm::scale(model, glm::vec3(0.2f));
         cube.drawLines(cubeShader, model, view, projection);
@@ -135,9 +138,9 @@ int main()
         terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
         drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
-        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
-        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
-        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
+        // drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
+        // drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
+        // drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
 
         scenePostdraw(window);
         // lightIntensity *= 0.8f;
