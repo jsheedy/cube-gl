@@ -98,18 +98,17 @@ public:
     {
         float velocity = MovementSpeed * deltaTime;
         if (direction == FORWARD)
-            Position += (glm::inverse(Orientation) * Front) * velocity;
-            // Position += glm::vec3(glm::mat4_cast(Orientation) * glm::vec4((Front * velocity), 1.0f));
+            Position -= (glm::inverse(Orientation) * glm::vec3(0.0, 0.0, 1.0)) * velocity;
         if (direction == BACKWARD)
-            Position -= (glm::inverse(Orientation) * Front) * velocity;
+            Position += (glm::inverse(Orientation) * glm::vec3(0.0, 0.0, 1.0)) * velocity;
         if (direction == LEFT)
-            Position -= (glm::inverse(Orientation) * Right) * velocity;
+            Position -= (glm::inverse(Orientation) * glm::vec3(1.0, 0.0, 0.0)) * velocity;
         if (direction == RIGHT)
-            Position += (glm::inverse(Orientation) * Right) * velocity;
+            Position += (glm::inverse(Orientation) * glm::vec3(1.0, 0.0, 0.0)) * velocity;
         if (direction == UP)
-            Position += (glm::inverse(Orientation) * Up) * velocity;
+            Position += (glm::inverse(Orientation) * glm::vec3(0.0, 1.0, 0.0)) * velocity;
         if (direction == DOWN)
-            Position -= (glm::inverse(Orientation) * Up) * velocity;
+            Position -= (glm::inverse(Orientation) * glm::vec3(0.0, 1.0, 0.0)) * velocity;
     }
 
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -118,8 +117,8 @@ public:
         xoffset *= MouseSensitivity;
         yoffset *= MouseSensitivity;
 
-        glm::quat YawRot = glm::angleAxis(xoffset, Up);
-        glm::quat PitchRot = glm::angleAxis(yoffset, Right);
+        glm::quat YawRot = glm::angleAxis(xoffset, glm::inverse(Orientation) * glm::vec3(0.0, 1.0, 0.0));
+        glm::quat PitchRot = glm::angleAxis(yoffset, glm::inverse(Orientation) * glm::vec3(1.0, 0.0, 0.0));
 
         Orientation =  PitchRot * Orientation * YawRot;
     }

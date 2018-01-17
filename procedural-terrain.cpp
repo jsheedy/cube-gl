@@ -165,6 +165,9 @@ int main()
             terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
             drawPlaneWireframeGrid(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
+            drawPlaneWireframeGrid(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
+            drawPlaneWireframeGrid(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
+            drawPlaneWireframeGrid(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
         }
         else if (shaderStyle == WIREFRAME) {
             terrainLineShader.use();
@@ -174,6 +177,9 @@ int main()
             terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
             drawPlaneWireframe(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
+            drawPlaneWireframe(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
+            drawPlaneWireframe(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
+            drawPlaneWireframe(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
         }
         else if (shaderStyle == FULL) {
             terrainShader.use();
