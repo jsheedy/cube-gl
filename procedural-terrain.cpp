@@ -68,7 +68,8 @@ int main()
     Axes axes;
 
     // Shader terrainShader("shaders/vertex/geometry.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
-    Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", "shaders/geometry/geometry.gs");
+    Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", NULL);
+    // Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry-texture.fs", "shaders/geometry/geometry.gs");
     // Shader terrainLineShader("shaders/vertex/height-map.vs", "shaders/fragment/geometry.fs", "shaders/geometry/geometry.gs");
     // Shader cubeShader("shaders/vertex/passthru.vs", "shaders/fragment/lines.fs", NULL);
     Shader cubeShader("shaders/vertex/wood-cube.vs", "shaders/fragment/texture.fs", NULL);
@@ -138,9 +139,9 @@ int main()
         terrainLineShader.setVec4("lineColor", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
         drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 0.0f), view, projection, heightMapTexture_12_03, heightMapTexture_12_03);
-        // drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
-        // drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
-        // drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
+        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 0.0f), view, projection, heightMapTexture_13_03, heightMapTexture_13_03);
+        drawPlane(plane, terrainLineShader, glm::vec3(0.0f, 0.0f, 1.0f), view, projection, heightMapTexture_12_04, heightMapTexture_12_04);
+        drawPlane(plane, terrainLineShader, glm::vec3(1.0f, 0.0f, 1.0f), view, projection, heightMapTexture_13_04, heightMapTexture_13_04);
 
         scenePostdraw(window);
         // lightIntensity *= 0.8f;
